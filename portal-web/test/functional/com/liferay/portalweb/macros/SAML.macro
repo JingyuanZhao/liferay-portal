@@ -552,7 +552,7 @@ definition {
 				userEmailAddress = "${userEmailAddress}");
 		}
 
-		Pause(locator1 = "1000");
+		WaitForSPARefresh();
 
 		AssertLocation.assertPartialLocation(value1 = "${spURL}");
 	}
@@ -581,7 +581,7 @@ definition {
 				userEmailAddress = "test@liferay.com");
 		}
 
-		Pause(locator1 = "1000");
+		WaitForSPARefresh();
 
 		AssertLocation.assertPartialLocation(value1 = "${spURL}");
 	}
@@ -852,7 +852,7 @@ definition {
 	}
 
 	macro viewSessionExpired {
-		Pause(locator1 = "${timer}");
+		WaitForSPARefresh();
 
 		AssertTextEquals(
 			locator1 = "Home#ERROR_MESSAGE_EXPIRED_SESSION",
