@@ -936,21 +936,15 @@ definition {
 		}
 
 		task ("Verify Test Expired Application") {
-			Pause(locator1 = "20000");
-
-			Refresh();
+			WaitForSPARefresh();
 
 			OAuth2.viewUserConnectedExpirationValue(expirationValue = "Within");
 
-			Pause(locator1 = "30000");
-
-			Refresh();
+			WaitForSPARefresh();
 
 			OAuth2.viewUserConnectedExpirationValue(expirationValue = "Seconds Ago");
 
-			Pause(locator1 = "30000");
-
-			Refresh();
+			WaitForSPARefresh();
 
 			SystemSettings.viewUserAvatarImage();
 
