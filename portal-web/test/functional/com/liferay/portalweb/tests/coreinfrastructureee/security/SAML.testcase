@@ -3136,6 +3136,7 @@ definition {
 	test MetadataURLDisappearsAfterChangedFromURLToXMLFile {
 		property app.server.bundles.size = "0";
 		property keystore.enabled = "true";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "SAML#MetadataURLDisappearsAfterChangedFromURLToXMLFile";
 
 		task ("Given: Add SAML configuration files") {
@@ -3324,6 +3325,7 @@ definition {
 	@priority = "4"
 	test SPInitiatedSSODoesNotSyncAttributesIfNotSent {
 		property app.server.bundles.size = "0";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "SAML#SPInitiatedSSODoesNotSyncAttributesIfNotSent";
 
 		var identityProviderEntityId = "samlidp";
