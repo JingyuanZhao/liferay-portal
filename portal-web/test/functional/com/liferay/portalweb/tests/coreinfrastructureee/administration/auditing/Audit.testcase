@@ -126,4 +126,29 @@ definition {
 		}
 	}
 
+	@description = "This is a use case for LPS-140258. Assert that sessionId is not present in the audit log context."
+	@priority = "2"
+	test AssertSessionIdIsNotPresentInAuditLogContext {
+		property portal.acceptance = "jessie";
+		property test.name.skip.portal.instance = "Audit#AssertSessionIdIsNotPresentInAuditLogContext";
+
+		task ("Enable log context and Incoming X-Request-ID") {
+			Audit.gotoSystemSettings(portlet = "Audit Log Context");
+
+			Click(locator1 = "Audit#AUDIT_LOG_CONTEXT_ENABLED_BUTTON");
+
+			Click(locator1 = "Audit#AUDIT_LOG_CONTEXT_USE_X-REQUEST-ID");
+
+			PortletEntry.save();
+
+			User.logoutPG();
+		}
+
+		task ("Assert that sessionId is not present in the audit log context") {
+			Navigator.openURL(baseURL = "http://localhost:8080/api/jsonws/user/get-user-by-email-address/company-id/email-address");
+
+			AssertConsoleTextNotPresent(value1 = "AuditLogContext.sessionId");
+		}
+	}
+
 }
