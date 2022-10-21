@@ -1,6 +1,7 @@
 @component-name = "portal-upgrades"
 definition {
 
+	property database.partition.enabled = "true";
 	property database.types = "db2,mariadb,mysql,oracle,postgresql,sqlserver,sybase";
 	property dummy.socket.proxy.disabled = "true";
 	property portal.release = "true";
@@ -41,6 +42,7 @@ definition {
 	@priority = "4"
 	test CanProvisionNewSPUserAfterUpgrade72101 {
 		property data.archive.type = "data-archive-saml-broken-mapping";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.2.10.1";
 
 		task ("Assert portal can provision a new SP user after successfully authenticating on the IDP") {
@@ -63,6 +65,7 @@ definition {
 	@priority = "4"
 	test CanProvisionNewSPUserAfterUpgrade73101 {
 		property data.archive.type = "data-archive-saml-broken-mapping";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.3.10.1";
 
 		task ("Assert portal can provision a new SP user after successfully authenticating on the IDP") {
@@ -133,6 +136,7 @@ definition {
 	@priority = "5"
 	test ViewSAMLConfigurationAfterUpgrade71103 {
 		property data.archive.type = "data-archive-saml";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.1.10.3";
 
 		task ("View SAML general IdP and connection configuration") {
@@ -173,6 +177,7 @@ definition {
 	@priority = "5"
 	test ViewSAMLConfigurationAfterUpgrade701016 {
 		property data.archive.type = "data-archive-saml";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.0.10.16";
 
 		task ("View SAML general IdP and connection configuration") {

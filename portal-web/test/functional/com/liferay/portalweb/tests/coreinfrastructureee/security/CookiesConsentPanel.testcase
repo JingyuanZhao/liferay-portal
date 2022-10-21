@@ -2,6 +2,7 @@
 definition {
 
 	property custom.properties = "feature.flag.LPS-142518=true";
+	property database.partition.enabled = "true";
 	property portal.release = "quarantine";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Cookies";
@@ -169,7 +170,7 @@ definition {
 	@ignore = "true"
 	@priority = "5"
 	test CookiesConsentPanelCouldSaveCookieSettingsWhenItsOnASitePage {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jessie";
 		property test.name.skip.portal.instance = "CookiesConsentPanel#CookieConsentPanelCouldSaveCookieSettingsWhenItsOnASitePage";
 
 		task ("Given: User creates a site page and adds Cookie Consent Configuration widget to it.") {

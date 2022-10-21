@@ -1,6 +1,7 @@
 @component-name = "portal-security"
 definition {
 
+	property database.partition.enabled = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "OAuth 2";
@@ -724,7 +725,7 @@ definition {
 	@description = "This is a use case for LPS-105158. Configuring the settings on system level will set the same settings on the Instance level."
 	@priority = "5"
 	test ConfigureOnSystemLevelShouldApplyToInstanceLevel {
-		property portal.acceptance = "true";
+		property portal.acceptance = "jessie";
 		property test.name.skip.portal.instance = "OAuth2#ConfigureOnSystemLevelShouldApplyToInstanceLevel";
 
 		task ("Delete OSGi JAX-RS Default configuration") {
@@ -1941,6 +1942,7 @@ definition {
 	@description = "This is a use case for LPS-105158. Scopes of external applications are displayed in lists on Instance Level."
 	@priority = "4"
 	test ScopesShouldBeDisplayedAsListOnInstanceLevel {
+		property portal.acceptance = "jessie";
 		property test.name.skip.portal.instance = "OAuth2#ScopesShouldBeDisplayedAsListOnInstanceLevel";
 
 		task ("Add CP able.com") {

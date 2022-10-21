@@ -1,6 +1,7 @@
 @component-name = "portal-security"
 definition {
 
+	property database.partition.enabled = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "CAPTCHA";
@@ -26,7 +27,7 @@ definition {
 	@priority = "4"
 	test AssertCaptchaEnabled {
 		property captcha.enabled = "true";
-		property portal.acceptance = "true";
+		property portal.acceptance = "jessie";
 
 		task ("View captcha") {
 			SignInNavigator.gotoCreateAccount();

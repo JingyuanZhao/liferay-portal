@@ -1,6 +1,7 @@
 @component-name = "portal-upgrades"
 definition {
 
+	property database.partition.enabled = "true";
 	property database.types = "db2,mariadb,mysql,oracle,postgresql,sqlserver,sybase";
 	property portal.release = "true";
 	property portal.upstream = "true";
@@ -18,6 +19,7 @@ definition {
 	test ViewOAuth2ApplicationInInstanceLevelAfterUpgrade713 {
 		property data.archive.type = "data-archive-oauth2-instance-level";
 		property database.types = "mariadb,mysql,postgresql";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.1.3";
 
 		task ("Login at able.com") {
@@ -83,6 +85,7 @@ definition {
 	@priority = "5"
 	test ViewOAuth2ApplicationInInstanceLevelAfterUpgrade71103 {
 		property data.archive.type = "data-archive-oauth2-instance-level";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.1.10.3";
 
 		task ("Login at able.com") {
@@ -115,6 +118,7 @@ definition {
 	@priority = "5"
 	test ViewOAuth2ApplicationInInstanceLevelAfterUpgrade72101 {
 		property data.archive.type = "data-archive-oauth2-instance-level";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.2.10.1";
 
 		task ("Login at able.com") {
@@ -174,6 +178,7 @@ definition {
 	test ViewOAuth2ApplicationInSystemLevelAfterUpgrade720 {
 		property data.archive.type = "data-archive-oauth2-system-level";
 		property database.types = "mariadb,mysql,postgresql";
+		property portal.acceptance = "jessie";
 		property portal.version = "7.2.0";
 
 		task ("View OAuth2 application information") {

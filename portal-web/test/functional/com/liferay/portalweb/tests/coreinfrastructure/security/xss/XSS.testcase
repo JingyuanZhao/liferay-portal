@@ -1,6 +1,7 @@
 @component-name = "portal-security"
 definition {
 
+	property database.partition.enabled = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property test.assert.warning.exceptions = "false";
@@ -387,6 +388,8 @@ definition {
 	@description = "This is a use case for LRQA-10472. View Recycle bin."
 	@priority = "4"
 	test NoXSSVulnerabilityInRecycleBin {
+		property portal.acceptance = "jessie";
+
 		var entryTitle = '''<script>alert(123);</script>''';
 
 		task ("Add Blog entry") {
