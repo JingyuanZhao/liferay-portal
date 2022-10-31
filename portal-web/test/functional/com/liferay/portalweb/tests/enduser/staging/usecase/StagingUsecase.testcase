@@ -1663,6 +1663,8 @@ definition {
 
 	@priority = "4"
 	test StagingPublishChildSiteWithReference {
+		property portal.upstream = "jessie";
+
 		task ("Given: User add a new WC to staging then publish the site") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
