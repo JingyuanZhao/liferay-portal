@@ -1322,6 +1322,223 @@ definition {
 		}
 	}
 
+	@description = "This is a use case for LPS-149374. TC-3: Verify that the changes to the deleted content will be published to Live if both Publish Displayed Content by Default and Replicate Individual Deletions are set to true."
+	@priority = "5"
+	test PublishWithDefaultTrueAndReplicateIndividualDeletions {
+		property portal.upstream = "jessie";
+
+		task ("Given: Enable the publish displayed content by default function") {
+			ApplicationsMenu.gotoPortlet(
+				category = "Configuration",
+				panel = "Control Panel",
+				portlet = "System Settings");
+
+			SystemSettings.gotoConfiguration(
+				configurationCategory = "Infrastructure",
+				configurationName = "Staging",
+				configurationScope = "Virtual Instance Scope");
+
+			FormFields.enableCheckbox(fieldName = "Publish Displayed Content by Default");
+
+			SystemSettings.saveConfiguration();
+		}
+
+		task ("And: Create 1WC, 1Form, 1Wiki content, 1DDL and connect them to display portlets on the page") {
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "site-name-staging");
+
+			WebContentNavigator.gotoAddCP();
+
+			WebContent.addCP(
+				webContentContent = "Web Content Content",
+				webContentTitle = "Web Content Title");
+
+			PortletEntry.publish();
+
+			FormsAdmin.openFormsAdmin(siteURLKey = "site-name-staging");
+
+			FormsAdminNavigator.gotoAddForm();
+
+			Form.editName(formName = "Form Name");
+
+			Form.editDescription(formDescription = "Form Description");
+
+			Form.addTextField(fieldPositionNumber = "0");
+
+			Form.publishForm();
+
+			JSONWiki.updateWikiPage(
+				groupName = "Site Name (Staging)",
+				site = "false",
+				wikiNodeName = "Main",
+				wikiPageContent = "Wiki FrontPage Content",
+				wikiPageName = "FrontPage");
+
+			ProductMenu.gotoPortlet(
+				category = "Content & Data",
+				portlet = "Dynamic Data Lists",
+				site = "Site Name (Staging)");
+
+			DDLList.addCP(
+				ddlListDescription = "Contacts Description",
+				ddlListName = "Contacts");
+
+			DDLDataDefinition.selectCP(ddlDataDefinitionName = "Contacts");
+
+			DDLDataDefinition.save();
+
+			DDLRecord.addCP(
+				ddlDataDefinitionName = "Contacts",
+				ddlListName = "Contacts");
+
+			DDLRecord.populateFieldText(
+				ddlRecordFieldData = "Liferay",
+				fieldFieldLabel = "Company",
+				fieldName = "company");
+
+			PortletEntry.publish();
+
+			JSONLayout.addWidgetToPublicLayout(
+				groupName = "Site Name (Staging)",
+				layoutName = "Staging Test Page",
+				site = "false",
+				widgetName = "Web Content Display");
+
+			JSONLayout.addWidgetToPublicLayout(
+				groupName = "Site Name (Staging)",
+				layoutName = "Staging Test Page",
+				site = "false",
+				widgetName = "Form");
+
+			JSONLayout.addWidgetToPublicLayout(
+				groupName = "Site Name (Staging)",
+				layoutName = "Staging Test Page",
+				site = "false",
+				widgetName = "Wiki Display");
+
+			JSONLayout.addWidgetToPublicLayout(
+				groupName = "Site Name (Staging)",
+				layoutName = "Staging Test Page",
+				site = "false",
+				widgetName = "Dynamic Data Lists Display");
+
+			ProductMenu.gotoPortlet(
+				category = "Site Builder",
+				portlet = "Pages",
+				site = "Site Name (Staging)");
+
+			PagesAdmin.configurePage(
+				columnName = "1 Column",
+				pageName = "Staging Test Page",
+				sitePageType = "Widget Page");
+
+			Navigator.gotoStagedSitePage(
+				pageName = "Staging Test Page",
+				siteName = "Site Name");
+
+			WebContentDisplayPortlet.selectWebContent(webContentTitle = "Web Content Title");
+
+			IFrame.closeFrame();
+
+			FormPortletNavigator.gotoSelectForm();
+
+			FormPortletConfiguration.selectForm(formName = "Form Name");
+
+			PortletEntry.save();
+
+			IFrame.closeFrame();
+
+			WikiDisplayPortlet.configureSetupPG(
+				wikiNodeName = "Main",
+				wikiPageName = "FrontPage");
+
+			IFrame.closeFrame();
+
+			DDLList.selectViaDDLDisplayPG(ddlListName = "Contacts");
+
+			IFrame.closeFrame();
+		}
+
+		task ("And: Publish staging without any content and verify that on Live the portlets are present with the contents displayed in them") {
+			Staging.gotoPublishToLive();
+
+			Staging.configurePublishToLive(
+				checkPageName = "Staging Test Page",
+				contentDateRange = "All",
+				uncheckContentNameList = "Dynamic Data Lists,Web Content,Forms,Wiki");
+
+			Staging.publishToLive();
+
+			Navigator.openSiteURL(siteName = "Site Name");
+
+			WebContentDisplayPortlet.viewContent(
+				webContentContent = "Web Content Content",
+				webContentTitle = "Web Content Title");
+
+			FormsAdmin.viewForm(
+				formDescription = "Form Description",
+				formName = "Form Name");
+
+			WikiPage.viewPG(
+				wikiPageContent = "Wiki FrontPage Content",
+				wikiPageTitle = "FrontPage");
+
+			DDLList.viewViaDDLDisplayPG(ddlListName = "Contacts");
+		}
+
+		task ("When: Delete the previously created contents and republish staging without contents but check the replicate individual deletions function") {
+			JSONWebcontent.deleteWebContent(
+				groupName = "Site Name (Staging)",
+				site = "false",
+				title = "Web Content Title");
+
+			Navigator.openStagingSiteURL(siteName = "Site Name");
+
+			FormsAdmin.deleteForm(formName = "Form Name");
+
+			DDLList.deleteCP(ddlListName = "Contacts");
+
+			JSONWiki.movePageToTrash(
+				groupName = "Site Name (Staging)",
+				site = "false",
+				wikiNodeName = "Main",
+				wikiPageName = "FrontPage");
+
+			Navigator.gotoStagedSitePage(
+				pageName = "Staging Test Page",
+				siteName = "Site Name");
+
+			Staging.gotoPublishToLive();
+
+			Staging.configurePublishToLive(
+				checkPageName = "Staging Test Page",
+				contentDateRange = "All",
+				contentDeletion = "true",
+				uncheckContentNameList = "Dynamic Data Lists,Web Content,Forms,Wiki");
+
+			Staging.publishToLive();
+		}
+
+		task ("Then: Verify that on Live the portlets are present but not the contents from them") {
+			Navigator.gotoSitePage(
+				pageName = "Staging Test Page",
+				siteName = "Site Name");
+
+			AssertTextPresent(
+				locator1 = "Message#ERROR",
+				value1 = "The selected web content no longer exists.");
+
+			Alert.viewWarningSpecific(warningMessage = "This form is not available or it was not published.");
+
+			AssertTextEquals(
+				locator1 = "Wiki#FRONTPAGE_DEFAULT_MESSAGE",
+				value1 = "This page is empty. Edit it to add some text.");
+
+			AssertTextPresent(
+				locator1 = "Message#ERROR",
+				value1 = "The record set could not be found.");
+		}
+	}
+
 	@description = "This is a use case for LPS-84418 and LPS-117578."
 	@priority = "5"
 	test PublishWithImpossibleDateRange {
