@@ -1354,6 +1354,7 @@ definition {
 	@description = "This is a use case for LPS-131578 and LPS-149374. User can configure the portal to exclude displayed contents from publishing."
 	@priority = "4"
 	test PublishViaPortletWithoutContent {
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "Staging#PublishViaPortletWithoutContent";
 
 		task ("Given: Unable the publish displayed content by default function and enable local staging") {
