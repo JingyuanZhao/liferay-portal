@@ -1325,6 +1325,7 @@ definition {
 	@description = "This is a use case for LPS-149374. TC-3: Verify the state of portlets and contents in Live when publishing with Publish Displayed Content by Default and Replicate Individual Deletions."
 	@priority = "5"
 	test PublishWithDefaultTrueAndReplicateIndividualDeletions {
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "StagingUsecase#PublishWithDefaultTrueAndReplicateIndividualDeletions";
 
 		task ("Given: Enable the publish displayed content by default function") {
