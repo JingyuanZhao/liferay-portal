@@ -138,6 +138,7 @@ out.println(PortalUtil.escapeRedirect("/"));
 	@description = "This is a use case for LPS-80905. User can access permissions window with permission from admin."
 	@priority = "5"
 	test UserCanAccessPermissionsWindowWithPermissionFromAdmin {
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "SecurityUsecase#UserCanAccessPermissionsWindowWithPermissionFromAdmin";
 
 		var portalURL = PropsUtil.get("portal.url");
@@ -306,6 +307,7 @@ out.println(PortalUtil.escapeRedirect("/"));
 	@description = "This is a use case for LPS-85112. Validate view permission cannot update other users password."
 	@priority = "5"
 	test ValidateViewPermissionCanNotUpdateOtherUsersPassword {
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "SecurityUsecase#ValidateViewPermissionCanNotUpdateOtherUsersPassword";
 
 		task ("Define user permission") {
