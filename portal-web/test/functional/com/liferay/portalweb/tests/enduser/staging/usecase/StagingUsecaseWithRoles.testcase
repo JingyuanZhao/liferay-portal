@@ -149,6 +149,7 @@ definition {
 	@priority = "4"
 	test StagingDemoLocalLive2 {
 		property name.skip.portal.instance = "StagingUsecaseWithRoles#StagingDemoLocalLive2";
+		property portal.upstream = "jessie";
 
 		JSONStaging.enableLocalStaging(
 			branchingPrivate = "true",
@@ -216,6 +217,7 @@ definition {
 	@priority = "4"
 	test StagingDemoLocalLive3 {
 		property name.skip.portal.instance = "StagingUsecaseWithRoles#StagingDemoLocalLive3";
+		property portal.upstream = "jessie";
 
 		JSONLayout.addPublicLayout(
 			groupName = "Site Name",
@@ -388,6 +390,7 @@ definition {
 	@priority = "5"
 	test StagingDemoLocalLive4 {
 		property name.skip.portal.instance = "StagingUsecaseWithRoles#StagingDemoLocalLive4";
+		property portal.upstream = "jessie";
 		property testray.component.names = "Training";
 
 		JSONLayout.addPublicLayout(
@@ -849,6 +852,7 @@ definition {
 	@priority = "5"
 	test StagingPublishPage {
 		property name.skip.portal.instance = "StagingUsecaseWithRoles#StagingPublishPage";
+		property portal.upstream = "jessie";
 		property testray.component.names = "Training";
 
 		JSONLayout.addPublicLayout(
