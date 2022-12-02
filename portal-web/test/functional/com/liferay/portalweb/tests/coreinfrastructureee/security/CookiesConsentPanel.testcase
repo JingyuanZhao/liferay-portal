@@ -45,6 +45,7 @@ definition {
 	@priority = "5"
 	test CookiesConsentPanelCouldBeAddedToASitePage {
 		property portal.acceptance = "true";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "CookiesConsentPanel#CookieConsentPanelCouldBeAddedToASitePage";
 
 		task ("Given: User creates a site page and adds Cookie Consent Configuration widget to it.") {
@@ -160,6 +161,7 @@ definition {
 	@priority = "5"
 	test CookiesConsentPanelCouldSaveCookieSettingsViaPortletAtSiteLevel {
 		property portal.acceptance = "true";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "CookiesConsentPanel#CookiesConsentPanelCouldSaveCookieSettingsViaPortletAtSiteLevel";
 
 		task ("Given: Create a site page with a Cookies Banner Configuration widget and add a new virtual host as SiteURL") {
@@ -230,6 +232,7 @@ definition {
 	@priority = "5"
 	test CookiesConsentPanelCouldSaveCookieSettingsWhenItsOnASitePage {
 		property portal.acceptance = "true";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "CookiesConsentPanel#CookieConsentPanelCouldSaveCookieSettingsWhenItsOnASitePage";
 
 		task ("Given: User creates a site page and adds Cookie Consent Configuration widget to it.") {
