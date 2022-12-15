@@ -333,7 +333,7 @@ public class ChangesetPortletDataHandler extends BasePortletDataHandler {
 			String originalPortletId = portletDataContext.getPortletId();
 
 			try {
-				String portletId = _getPortletId(
+				String portletId = _getPortletIdForClassName(
 					ExportImportClassedModelUtil.getClassName(stagedModel));
 
 				if (Validator.isNotNull(portletId)) {
@@ -355,7 +355,7 @@ public class ChangesetPortletDataHandler extends BasePortletDataHandler {
 		return true;
 	}
 
-	private String _getPortletId(String className) {
+	private String _getPortletIdForClassName(String className) {
 		List<Portlet> dataSiteLevelPortlets = Collections.emptyList();
 
 		try {
