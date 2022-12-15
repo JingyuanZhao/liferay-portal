@@ -33,6 +33,8 @@ definition {
 	@priority = "4"
 	@uitest
 	test AddWidgetTemplateInStagingSite {
+		property portal.upstream = "jessie";
+
 		task ("Add a widget templates in staging site") {
 			ApplicationDisplayTemplates.openWidgetTemplatesAdmin(siteURLKey = "test-site-name-staging");
 
