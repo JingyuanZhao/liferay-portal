@@ -2166,7 +2166,9 @@ definition {
 					locator1 = "TextInput#ANSWER",
 					value1 = "test");
 
-				Button.click(button = "Save");
+				KeyPress(
+					locator1 = "TextInput#ANSWER",
+					value1 = "\RETURN");
 			}
 		}
 
