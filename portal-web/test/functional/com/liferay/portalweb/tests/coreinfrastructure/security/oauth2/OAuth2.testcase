@@ -557,10 +557,21 @@ definition {
 		property custom.properties = "virtual.hosts.default.site.name=Guest";
 		property osgi.module.configuration.file.names = "com.liferay.oauth2.provider.scope.internal.configuration.BundlePrefixHandlerFactoryConfiguration~default.config";
 		property osgi.module.configurations = "include.bundle.symbolic.name=\"false\"${line.separator}osgi.jaxrs.name=\"Default\"${line.separator}separator=\"\"${line.separator}service.properties=\"\"";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "OAuth2#AuthPromptInRequestScopeShouldNotBeVisible";
 
 		task ("Deploy simple OAuth2 provider app") {
 			FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.sample.jar");
+
+			GogoShell.openGogoShellAdmin();
+
+			WaitForConsoleTextPresent(value1 = "STARTED com.liferay.oauth2.provider.sample_");
+
+			GogoShell.executeCommand(commandName = "lb com.liferay.oauth2.provider.sample");
+
+			GogoShell.viewOutput(outputContent = "Liferay OAuth2 Provider Sample");
+
+			GogoShell.viewOutput(outputContent = "Active");
 		}
 
 		task ("Go to OAuth 2 administration") {
@@ -796,9 +807,20 @@ definition {
 	test EditApplicationScopesAndViewLanguageKeys {
 		property osgi.module.configuration.file.names = "com.liferay.oauth2.provider.scope.internal.configuration.ConfigurableScopeMapperConfiguration~default.config";
 		property osgi.module.configurations = "mapping=[\"example-scope-1,example-scope-2\=everything\"]${line.separator}osgi.jaxrs.name=\"liferay-oauth2-scope-sample-qa-app\"${line.separator}passthrough=\"true\"";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "OAuth2#EditApplicationScopesAndViewLanguageKeys";
 
 		FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.scope.sample.qa.jar");
+
+		GogoShell.openGogoShellAdmin();
+
+		WaitForConsoleTextPresent(value1 = "STARTED com.liferay.oauth2.provider.scope.sample.qa_");
+
+		GogoShell.executeCommand(commandName = "lb com.liferay.oauth2.provider.scope.sample.qa");
+
+		GogoShell.viewOutput(outputContent = "Liferay OAuth2 Provider Scope Sample QA");
+
+		GogoShell.viewOutput(outputContent = "Active");
 
 		task ("Delete OSGi JAX-RS Default configuration") {
 			var baseURL = PropsUtil.get("portal.url");
@@ -1934,9 +1956,20 @@ definition {
 
 	@description = "This is a use case for LRQA-48773. User can update scope bundle prefixes."
 	test ScopeBundlePrefixesCanBeUpdated {
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "OAuth2#ScopeBundlePrefixesCanBeUpdated";
 
 		FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.scope.sample.qa.jar");
+
+		GogoShell.openGogoShellAdmin();
+
+		WaitForConsoleTextPresent(value1 = "STARTED com.liferay.oauth2.provider.scope.sample.qa_");
+
+		GogoShell.executeCommand(commandName = "lb com.liferay.oauth2.provider.scope.sample.qa");
+
+		GogoShell.viewOutput(outputContent = "Liferay OAuth2 Provider Scope Sample QA");
+
+		GogoShell.viewOutput(outputContent = "Active");
 
 		task ("Add OAuth 2 Application") {
 			var portalURL = PropsUtil.get("portal.url");
@@ -2001,9 +2034,20 @@ definition {
 	test ScopeMappingsCanBeUpdated {
 		property osgi.module.configuration.file.names = "com.liferay.oauth2.provider.scope.internal.configuration.ConfigurableScopeMapperConfiguration~liferay~oauth2~scope~sample~qa~app.config";
 		property osgi.module.configurations = "mapping=[\"example-scope-1,example-scope-2\=everything.read,everything.write\"]${line.separator}osgi.jaxrs.name=\"liferay-oauth2-scope-sample-qa-app\"${line.separator}passthrough=\"false\"";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "OAuth2#ScopeMappingsCanBeUpdated";
 
 		FileInstall.deployFileOnServer(jarFile = "com.liferay.oauth2.provider.scope.sample.qa.jar");
+
+		GogoShell.openGogoShellAdmin();
+
+		WaitForConsoleTextPresent(value1 = "STARTED com.liferay.oauth2.provider.scope.sample.qa_");
+
+		GogoShell.executeCommand(commandName = "lb com.liferay.oauth2.provider.scope.sample.qa");
+
+		GogoShell.viewOutput(outputContent = "Liferay OAuth2 Provider Scope Sample QA");
+
+		GogoShell.viewOutput(outputContent = "Active");
 
 		task ("Delete OSGi JAX-RS Default configuration") {
 			var baseURL = PropsUtil.get("portal.url");
