@@ -3216,6 +3216,7 @@ definition {
 	test SAMLConfigurationNotApplyToSitesAfterACSDisabled {
 		property app.server.bundles.size = "0";
 		property custom.properties = "company.security.strangers.verify=false";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "SAML#SAMLConfigurationNotApplyToSitesAfterACSDisabled";
 
 		task ("Given: Create user, custom domain site and create SAML link between idp.com and sp.com") {
@@ -3887,6 +3888,7 @@ definition {
 	test SSOLoginLogoutWorkSameWhenSitesConfiguredAsSP {
 		property app.server.bundles.size = "0";
 		property custom.properties = "company.security.strangers.verify=false";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "SAML#SSOLoginLogoutWorkSameWhenSitesConfiguredAsSP";
 
 		task ("Given: Create users, custom domain sites and create SAML links between two IdPs and two SPs") {
