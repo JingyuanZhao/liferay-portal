@@ -3211,6 +3211,120 @@ definition {
 		}
 	}
 
+	@description = "This is a use case for LPS-170940. TC-2: The SAML configuration is not applied to the sites when ACS is disabled."
+	@priority = "5"
+	test SAMLConfigurationNotApplyToSitesAfterACSDisabled {
+		property app.server.bundles.size = "0";
+		property custom.properties = "company.security.strangers.verify=false";
+		property test.name.skip.portal.instance = "SAML#SAMLConfigurationNotApplyToSitesAfterACSDisabled";
+
+		task ("Given: Create user, custom domain site and create SAML link between idp.com and sp.com") {
+			SAML.addVirtualInstances(virtualHosts = "www.sp.com,www.idp.com");
+
+			SAML.configureLiferaySAMLAsIdP(
+				idpURL = "http://www.idp.com:8080",
+				samlEntityId = "samlidp",
+				userEmailAddress = "test@www.idp.com");
+
+			JSONUser.addUser(
+				creatorEmailAddress = "test@www.idp.com",
+				creatorPassword = "test",
+				portalInstanceName = "www.idp.com",
+				specificURL = "http://www.idp.com:8080",
+				userEmailAddress = "usera@www.idp.com",
+				userFirstName = "user",
+				userLastName = "a",
+				userScreenName = "usera");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				newPassword = "test",
+				requireReset = "false",
+				specificURL = "http://www.idp.com:8080",
+				userEmailAddress = "usera@www.idp.com");
+
+			SAML.setupSP(
+				samlEntityId = "samlsp",
+				spURL = "http://www.sp.com:8080",
+				userEmailAddress = "test@www.sp.com");
+
+			User.firstLoginUI(
+				password = "test",
+				specificURL = "http://www.sp.com:8080",
+				userEmailAddress = "test@www.sp.com");
+
+			JSONGroup.addGroup(
+				groupName = "Site Name",
+				portalURL = "http://www.sp.com:8080");
+
+			Site.openSiteSettingsAdmin(
+				baseURL = "http://www.sp.com:8080",
+				siteURLKey = "site-name");
+
+			Site.addVirtualHostsURLCP(
+				pageVirtualHosts = "true",
+				pageVirtualHostURL = "www.sp-site.com");
+
+			SAML.connectSPAndIdP(
+				idpAttributeMapping = "UUID,screenName,firstName,lastName,emailAddress",
+				idpEntityId = "samlidp",
+				idpURL = "http://www.idp.com:8080",
+				spAttributes = '''emailAddress
+					firstName
+					lastName
+					screenName
+					uuid''',
+				spEntityId = "samlsp",
+				spURL = "http://www.sp.com:8080",
+				sPUserEmailAddress = "test@www.sp.com",
+				userResolution = "dynamic");
+		}
+
+		task ("And: Disable the Authn Request Signing Allows Dynamic ACS URL checkbox") {
+			SAML.goToSAMLAdmin(baseURL = "http://www.idp.com:8080");
+
+			SAMLNavigation.gotoIdentityProvider();
+
+			AssertChecked(
+				checkboxName = "Authn Request Signing Allows Dynamic ACS URL",
+				locator1 = "Checkbox#ANY_CHECKBOX");
+
+			SAMLPortlet.configureIdentityProvider(authnrequestsigningallowsdynamicacsurl = "disable");
+
+			User.logoutPG(specificURL = "http://www.idp.com:8080");
+
+			User.viewLoggedOutPG();
+		}
+
+		task ("When: User log in to sp.com normally and log out") {
+			User.firstLoginUI(
+				idpName = "samlidp",
+				password = "test",
+				specificURL = "http://www.sp.com:8080",
+				userEmailAddress = "usera@www.idp.com");
+
+			UserBar.gotoDropdownItem(dropdownItem = "My Profile");
+
+			AssertTextEquals(
+				locator1 = "Home#SITE_NAME",
+				value1 = "user a");
+
+			User.logoutPG(specificURL = "http://www.sp.com:8080");
+
+			User.viewLoggedOutPG();
+		}
+
+		task ("Then: User is unable to initiate SP SSO on sp-site.com") {
+			User.firstLoginUI(
+				idpName = "samlidp",
+				password = "test",
+				specificURL = "http://www.sp-site.com:8080",
+				userEmailAddress = "usera@www.idp.com");
+
+			User.viewLoggedOutPG();
+		}
+	}
+
 	@description = "LPS-105169 TC-3: SP initiated login should not sync IdP&SP user attributes if not part of attribute mapping - Using virtual instances."
 	@priority = "4"
 	test SPInitiatedSSODoesNotSyncAttributesIfNotMapped {
@@ -3765,6 +3879,219 @@ definition {
 			User.viewLoggedInPG();
 
 			AssertConsoleTextPresent(value1 = "nameid-format:unspecified");
+		}
+	}
+
+	@description = "This is a use case for LPS-170940. TC-1: Verify SSO login and logout mechanism works the same when having multiple sites configured as SP."
+	@priority = "5"
+	test SSOLoginLogoutWorkSameWhenSitesConfiguredAsSP {
+		property app.server.bundles.size = "0";
+		property custom.properties = "company.security.strangers.verify=false";
+		property test.name.skip.portal.instance = "SAML#SSOLoginLogoutWorkSameWhenSitesConfiguredAsSP";
+
+		task ("Given: Create users, custom domain sites and create SAML links between two IdPs and two SPs") {
+			SAML.addVirtualInstances(virtualHosts = "www.sp1.com,www.sp2.com,www.idp1.com,www.idp2.com");
+
+			SAML.configureLiferaySAMLAsIdP(
+				idpURL = "http://www.idp1.com:8080",
+				samlEntityId = "IP1",
+				userEmailAddress = "test@www.idp1.com");
+
+			JSONUser.addUser(
+				creatorEmailAddress = "test@www.idp1.com",
+				creatorPassword = "test",
+				portalInstanceName = "www.idp1.com",
+				specificURL = "http://www.idp1.com:8080",
+				userEmailAddress = "user1@www.idp1.com",
+				userFirstName = "user1",
+				userLastName = "user1",
+				userScreenName = "user1");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				newPassword = "test",
+				requireReset = "false",
+				specificURL = "http://www.idp1.com:8080",
+				userEmailAddress = "user1@www.idp1.com");
+
+			SAML.configureLiferaySAMLAsIdP(
+				idpURL = "http://www.idp2.com:8080",
+				samlEntityId = "IP2",
+				userEmailAddress = "test@www.idp2.com");
+
+			JSONUser.addUser(
+				creatorEmailAddress = "test@www.idp2.com",
+				creatorPassword = "test",
+				portalInstanceName = "www.idp2.com",
+				specificURL = "http://www.idp2.com:8080",
+				userEmailAddress = "user2@www.idp2.com",
+				userFirstName = "user2",
+				userLastName = "user2",
+				userScreenName = "user2");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				newPassword = "test",
+				requireReset = "false",
+				specificURL = "http://www.idp2.com:8080",
+				userEmailAddress = "user2@www.idp2.com");
+
+			SAML.setupSP(
+				samlEntityId = "SP1",
+				spURL = "http://www.sp1.com:8080",
+				userEmailAddress = "test@www.sp1.com");
+
+			SAML.setupSP(
+				samlEntityId = "SP2",
+				spURL = "http://www.sp2.com:8080",
+				userEmailAddress = "test@www.sp2.com");
+
+			User.firstLoginUI(
+				password = "test",
+				specificURL = "http://www.sp2.com:8080",
+				userEmailAddress = "test@www.sp2.com");
+
+			for (var siteNum : list "1,2") {
+				JSONGroup.addGroup(
+					groupName = "Site${siteNum}",
+					portalURL = "http://www.sp2.com:8080");
+
+				Site.openSiteSettingsAdmin(
+					baseURL = "http://www.sp2.com:8080",
+					siteURLKey = "site${siteNum}");
+
+				Site.addVirtualHostsURLCP(
+					pageVirtualHosts = "true",
+					pageVirtualHostURL = "www.sp2-site${siteNum}.com");
+			}
+
+			SAML.connectSPAndIdP(
+				idpAttributeMapping = "UUID,screenName,firstName,lastName,emailAddress",
+				idpEntityId = "IP1",
+				idpURL = "http://www.idp1.com:8080",
+				spAttributes = '''emailAddress
+					firstName
+					lastName
+					screenName
+					uuid''',
+				spEntityId = "SP1",
+				spURL = "http://www.sp1.com:8080",
+				sPUserEmailAddress = "test@www.sp1.com",
+				userResolution = "dynamic");
+
+			SAML.connectSPAndIdP(
+				idpAttributeMapping = "UUID,screenName,firstName,lastName,emailAddress",
+				idpEntityId = "IP2",
+				idpURL = "http://www.idp2.com:8080",
+				spAttributes = '''emailAddress
+					firstName
+					lastName
+					screenName
+					uuid''',
+				spEntityId = "SP1",
+				spURL = "http://www.sp1.com:8080",
+				sPUserEmailAddress = "test@www.sp1.com",
+				userResolution = "dynamic");
+
+			SAML.connectSPAndIdP(
+				idpAttributeMapping = "UUID,screenName,firstName,lastName,emailAddress",
+				idpEntityId = "IP1",
+				idpURL = "http://www.idp1.com:8080",
+				spAttributes = '''emailAddress
+					firstName
+					lastName
+					screenName
+					uuid''',
+				spEntityId = "SP2",
+				spURL = "http://www.sp2.com:8080",
+				sPUserEmailAddress = "test@www.sp2.com",
+				userResolution = "dynamic");
+
+			SAML.connectSPAndIdP(
+				idpAttributeMapping = "UUID,screenName,firstName,lastName,emailAddress",
+				idpEntityId = "IP2",
+				idpURL = "http://www.idp2.com:8080",
+				spAttributes = '''emailAddress
+					firstName
+					lastName
+					screenName
+					uuid''',
+				spEntityId = "SP2",
+				spURL = "http://www.sp2.com:8080",
+				sPUserEmailAddress = "test@www.sp2.com",
+				userResolution = "dynamic");
+
+			User.logoutPG(specificURL = "http://www.idp1.com:8080");
+
+			User.viewLoggedOutPG();
+
+			User.logoutPG(specificURL = "http://www.idp2.com:8080");
+
+			User.viewLoggedOutPG();
+		}
+
+		task ("When: Log in user1 to sp1.com and sp2-site1.com, then log in user2 to sp2-site2 and sp2.com") {
+			User.firstLoginUI(
+				idpName = "IP1",
+				password = "test",
+				specificURL = "http://www.sp1.com:8080",
+				userEmailAddress = "user1@www.idp1.com");
+
+			UserBar.gotoDropdownItem(dropdownItem = "My Profile");
+
+			AssertTextEquals(
+				locator1 = "Home#SITE_NAME",
+				value1 = "user1 user1");
+
+			User.firstLoginUI(
+				idpName = "IP1",
+				password = "test",
+				specificURL = "http://www.sp2-site1.com:8080",
+				userEmailAddress = "user1@www.idp1.com");
+
+			UserBar.gotoDropdownItem(dropdownItem = "My Profile");
+
+			AssertTextEquals(
+				locator1 = "Home#SITE_NAME",
+				value1 = "user1 user1");
+
+			User.firstLoginUI(
+				idpName = "IP2",
+				password = "test",
+				specificURL = "http://www.sp2-site2.com:8080",
+				userEmailAddress = "user2@www.idp2.com");
+
+			UserBar.gotoDropdownItem(dropdownItem = "My Profile");
+
+			AssertTextEquals(
+				locator1 = "Home#SITE_NAME",
+				value1 = "user2 user2");
+
+			User.firstLoginUI(
+				idpName = "IP2",
+				password = "test",
+				specificURL = "http://www.sp2.com:8080",
+				userEmailAddress = "user2@www.idp2.com");
+
+			User.viewLoggedInPG();
+		}
+
+		task ("And: Log out user2 from sp2-site2.com") {
+			User.logoutPG(specificURL = "http://www.sp2-site2.com:8080");
+		}
+
+		task ("Then: Verify that user2 is logged out from sp2.com but user1 not from sp1.com and sp2-site1.com") {
+			Navigator.openSpecificURL(url = "http://www.sp2.com:8080");
+
+			User.viewLoggedOutPG();
+
+			Navigator.openSpecificURL(url = "http://www.sp1.com:8080");
+
+			User.viewLoggedInPG();
+
+			Navigator.openSpecificURL(url = "http://www.sp2-site1.com:8080");
+
+			User.viewLoggedInPG();
 		}
 	}
 
