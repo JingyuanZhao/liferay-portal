@@ -5,4 +5,8 @@ definition {
 		selenium.setWindowSize(${value1});
 	}
 
+	function maximizeWindow {
+		selenium.maximizeWindow();
+	}
+
 }
