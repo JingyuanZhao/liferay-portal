@@ -791,9 +791,12 @@ definition {
 	@description = "This is a use case for LPS-74038. Expected error message will appear on the UI when the live instance is not running on remote staging and the link to it is not visible."
 	@priority = 5
 	test ViewInfoMessageAfterShutDownRemoteSite {
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "RemoteStaging#ViewInfoMessageAfterShutDownRemoteSite";
 
 		Clustering.shutdownSpecificServer(nodePort = 9080);
+
+		Pause(locator1 = 300000);
 
 		Navigator.openSiteURL(siteName = "Site Name");
 
