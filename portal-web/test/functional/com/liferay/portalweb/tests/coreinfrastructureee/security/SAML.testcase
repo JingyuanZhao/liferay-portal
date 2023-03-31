@@ -4120,6 +4120,7 @@ definition {
 	@description = "This is a use case for LPS-129934. View IdP single logout with multiple SPs - Using virtual instances."
 	@priority = 4
 	test ViewIdPSingleLogoutWithMultipleSPs {
+		property database.partition.enabled = "true";
 		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "SAML#ViewIdPSingleLogoutWithMultipleSPs";
 
@@ -5102,6 +5103,7 @@ definition {
 	@priority = 5
 	test ViewSPInitiatedSSOWithSAMLAttributeUUIDUsedForUserMatching {
 		property app.server.bundles.size = "0";
+		property database.partition.enabled = "true";
 		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "SAML#ViewSPInitiatedSSOWithSAMLAttributeUUIDUsedForUserMatching";
 
