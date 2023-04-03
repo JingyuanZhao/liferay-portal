@@ -59,10 +59,12 @@ import com.liferay.object.service.ObjectLayoutLocalService;
 import com.liferay.object.service.ObjectLayoutTabLocalService;
 import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.object.service.ObjectViewLocalService;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.portal.kernel.dao.orm.ArgumentsResolver;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
@@ -175,7 +177,7 @@ public class ObjectDefinitionDeployerImpl implements ObjectDefinitionDeployer {
 	public List<ServiceRegistration<?>> deploy(
 		ObjectDefinition objectDefinition) {
 
-		if (objectDefinition.isSystem()) {
+		if (objectDefinition.isUnmodifiableSystemObject()) {
 			return Collections.emptyList();
 		}
 
@@ -211,12 +213,20 @@ public class ObjectDefinitionDeployerImpl implements ObjectDefinitionDeployer {
 				ArgumentsResolver.class,
 				new ObjectDefinitionTableArgumentsResolver(
 					objectDefinition.getDBTableName()),
-				null),
+				HashMapDictionaryBuilder.put(
+					"class.name", objectDefinition.getDBTableName()
+				).put(
+					"table.name", objectDefinition.getDBTableName()
+				).build()),
 			_bundleContext.registerService(
 				ArgumentsResolver.class,
 				new ObjectDefinitionTableArgumentsResolver(
 					objectDefinition.getExtensionDBTableName()),
-				null),
+				HashMapDictionaryBuilder.put(
+					"class.name", objectDefinition.getExtensionDBTableName()
+				).put(
+					"table.name", objectDefinition.getExtensionDBTableName()
+				).build()),
 			_bundleContext.registerService(
 				KeywordQueryContributor.class,
 				new ObjectEntryKeywordQueryContributor(
@@ -354,7 +364,10 @@ public class ObjectDefinitionDeployerImpl implements ObjectDefinitionDeployer {
 				"item.class.name", objectDefinition.getClassName()
 			).build());
 
-		try {
+		try (SafeCloseable safeCloseable =
+				CompanyThreadLocal.setWithSafeCloseable(
+					objectDefinition.getCompanyId())) {
+
 			for (Locale locale : LanguageUtil.getAvailableLocales()) {
 				String languageId = LocaleUtil.toLanguageId(locale);
 

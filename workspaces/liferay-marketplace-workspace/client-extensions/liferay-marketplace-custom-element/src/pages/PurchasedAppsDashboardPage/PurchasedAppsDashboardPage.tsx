@@ -1,37 +1,45 @@
+import {ClayPaginationBarWithBasicItems} from '@clayui/pagination-bar';
 import {useEffect, useState} from 'react';
 
 import accountLogo from '../../assets/icons/mainAppLogo.svg';
-import {
-	AppProps,
-	DashboardTable,
-} from '../../components/DashboardTable/DashboardTable';
-import {DashboardTableRow} from '../../components/DashboardTable/DashboardTableRow';
-import {getOrders} from '../../utils/api';
+import {DashboardTable} from '../../components/DashboardTable/DashboardTable';
+import {PurchasedAppsDashboardTableRow} from '../../components/DashboardTable/PurchasedAppsDashboardTableRow';
+import {getChannels, getOrders, getUserAccountsById} from '../../utils/api';
 import {DashboardPage} from '../DashBoardPage/DashboardPage';
 import {initialDashboardNavigationItems} from './PurchasedDashboardPageUtil';
 
+export interface PurchasedAppProps {
+	image: string;
+	name: string;
+	orderId: number;
+	project?: string;
+	provisioning: string;
+	purchasedBy: string;
+	purchasedDate: string;
+	type: string;
+	version?: string;
+}
+
+interface PurchasedAppTable {
+	items: PurchasedAppProps[];
+	pageSize: number;
+	totalCount: number;
+}
+
 const tableHeaders = [
 	{
-		iconSymbol: 'order-arrow',
 		title: 'Name',
 	},
 	{
-		iconSymbol: 'order-arrow',
 		title: 'Purchased By',
 	},
 	{
-		iconSymbol: 'order-arrow',
 		title: 'Type',
 	},
 	{
-		iconSymbol: 'order-arrow',
 		title: 'Order ID',
 	},
 	{
-		title: 'Project',
-	},
-	{
-		iconSymbol: 'order-arrow',
 		title: 'Provisioning',
 	},
 	{
@@ -39,8 +47,17 @@ const tableHeaders = [
 	},
 ];
 
+const initialUserAccountState: UserAccount = {
+	accountBriefs: [],
+};
+
 export function PurchasedAppsDashboardPage() {
-	const [orders, setOrders] = useState<AppProps[]>(Array<AppProps>());
+	const [userAccounts, setUserAccounts] = useState<UserAccount>(
+		initialUserAccountState
+	);
+	const [purchasedAppTable, setPurchasedAppTable] =
+		useState<PurchasedAppTable>({items: [], pageSize: 7, totalCount: 1});
+	const [page, setPage] = useState<number>(1);
 	const [dashboardNavigationItems, setDashboardNavigationItems] = useState(
 		initialDashboardNavigationItems
 	);
@@ -57,31 +74,97 @@ export function PurchasedAppsDashboardPage() {
 	};
 
 	useEffect(() => {
-		(async () => {
-			const orders = await getOrders();
+		const makeFetch = async () => {
+			const userAccounts = await getUserAccountsById();
 
-			setOrders(orders);
-		})();
-	}, []);
+			const channels = await getChannels();
+
+			const channel =
+				channels.find(
+					(channel) => channel.name === 'Marketplace Channel'
+				) || channels[0];
+
+			const placedOrders = await getOrders(
+				userAccounts.accountBriefs[0]?.id || 50307,
+				channel.id,
+				page,
+				purchasedAppTable.pageSize
+			);
+
+			const newOrderItems = placedOrders.items.map((order) => {
+				const [placeOrderItem] = order.placedOrderItems;
+
+				const date = new Date(order.createDate);
+				const options: Intl.DateTimeFormatOptions = {
+					day: 'numeric',
+					month: 'short',
+					year: 'numeric',
+				};
+				const formattedDate = date.toLocaleDateString('en-US', options);
+
+				return {
+					image: placeOrderItem.thumbnail,
+					name: placeOrderItem.name,
+					orderId: order.id,
+					provisioning: order.orderStatusInfo.label_i18n,
+					purchasedBy: order.author,
+					purchasedDate: formattedDate,
+					type: placeOrderItem.subscription
+						? 'Subscription'
+						: 'Perpetual',
+				};
+			});
+
+			setPurchasedAppTable({
+				...purchasedAppTable,
+				items: newOrderItems,
+				totalCount: placedOrders.totalCount,
+			});
+
+			const userAccountsResponse = await getUserAccountsById();
+
+			setUserAccounts(userAccountsResponse);
+		};
+		makeFetch();
+	}, [page]);
 
 	return (
 		<DashboardPage
 			accountAppsNumber="0"
 			accountLogo={accountLogo}
-			accountTitle="Hourglass"
+			accounts={userAccounts.accountBriefs}
 			buttonMessage="Add Apps"
 			dashboardNavigationItems={dashboardNavigationItems}
-			items={orders}
 			messages={messages}
 			setDashboardNavigationItems={setDashboardNavigationItems}
 		>
-			<DashboardTable<AppProps>
+			<DashboardTable<PurchasedAppProps>
 				emptyStateMessage={messages.emptyStateMessage}
-				items={orders}
+				items={purchasedAppTable.items}
 				tableHeaders={tableHeaders}
 			>
-				{(item) => <DashboardTableRow item={item} key={item.name} />}
+				{(item) => (
+					<PurchasedAppsDashboardTableRow
+						item={item}
+						key={item.name}
+					/>
+				)}
 			</DashboardTable>
+
+			{purchasedAppTable.items.length ? (
+				<ClayPaginationBarWithBasicItems
+					active={page}
+					activeDelta={purchasedAppTable.pageSize}
+					defaultActive={1}
+					ellipsisBuffer={3}
+					ellipsisProps={{'aria-label': 'More', 'title': 'More'}}
+					onActiveChange={setPage}
+					showDeltasDropDown={false}
+					totalItems={purchasedAppTable?.totalCount}
+				/>
+			) : (
+				<></>
+			)}
 		</DashboardPage>
 	);
 }

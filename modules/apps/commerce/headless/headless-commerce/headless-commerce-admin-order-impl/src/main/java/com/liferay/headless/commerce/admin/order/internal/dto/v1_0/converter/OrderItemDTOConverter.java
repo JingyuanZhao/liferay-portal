@@ -43,7 +43,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	property = "dto.class.name=com.liferay.commerce.model.CommerceOrderItem",
-	service = {DTOConverter.class, OrderItemDTOConverter.class}
+	service = DTOConverter.class
 )
 public class OrderItemDTOConverter
 	implements DTOConverter<CommerceOrderItem, OrderItem> {
@@ -172,7 +172,9 @@ public class OrderItemDTOConverter
 							return new String[] {url};
 						}
 						catch (PortalException portalException) {
-							_log.error(portalException);
+							if (_log.isDebugEnabled()) {
+								_log.debug(portalException);
+							}
 
 							return null;
 						}

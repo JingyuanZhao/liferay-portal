@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.test.portlet.MockLiferayResourceResponse;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -60,9 +61,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -106,6 +104,12 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 		User user = Mockito.mock(User.class);
 
 		Mockito.when(
+			user.getFirstName()
+		).thenReturn(
+			RandomTestUtil.randomString()
+		);
+
+		Mockito.when(
 			user.getPortraitId()
 		).thenReturn(
 			12345L
@@ -115,6 +119,12 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 			user.getPortraitURL(Mockito.any(ThemeDisplay.class))
 		).thenReturn(
 			"portraitURL"
+		);
+
+		Mockito.when(
+			user.getUserId()
+		).thenReturn(
+			RandomTestUtil.randomLong()
 		);
 
 		ContentDashboardItem<?> contentDashboardItem =
@@ -331,19 +341,10 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 
 		JSONArray tagsJSONArray = jsonObject.getJSONArray("tags");
 
-		List<AssetTag> assetTags = contentDashboardItem.getAssetTags();
-
-		Stream<AssetTag> stream = assetTags.stream();
-
 		Assert.assertEquals(
 			JSONUtil.putAll(
-				stream.map(
-					AssetTag::getName
-				).collect(
-					Collectors.toList()
-				).toArray(
-					new String[0]
-				)
+				ListUtil.toArray(
+					contentDashboardItem.getAssetTags(), AssetTag.NAME_ACCESSOR)
 			).toString(),
 			tagsJSONArray.toString());
 
@@ -669,22 +670,6 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 		}
 
 		public ContentDashboardItem build() {
-			String userName = Optional.ofNullable(
-				_user
-			).map(
-				user -> user.getFirstName()
-			).orElseGet(
-				RandomTestUtil::randomString
-			);
-
-			long userId = Optional.ofNullable(
-				_user
-			).map(
-				user -> user.getUserId()
-			).orElseGet(
-				RandomTestUtil::randomLong
-			);
-
 			AssetCategory assetCategory1 = Mockito.mock(AssetCategory.class);
 
 			Mockito.when(
@@ -733,6 +718,17 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 				RandomTestUtil.randomString()
 			);
 
+			long userId = RandomTestUtil.randomLong();
+			String userName = RandomTestUtil.randomString();
+
+			if (_user != null) {
+				userId = _user.getUserId();
+				userName = _user.getFirstName();
+			}
+
+			long finalUserId = userId;
+			String finalUserName = userName;
+
 			return new ContentDashboardItem() {
 
 				@Override
@@ -763,15 +759,10 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 						HttpServletRequest httpServletRequest,
 						ContentDashboardItemAction.Type... types) {
 
-					Stream<ContentDashboardItemAction> stream =
-						_contentDashboardItemActions.stream();
-
-					return stream.filter(
+					return ListUtil.filter(
+						_contentDashboardItemActions,
 						contentDashboardItemAction -> ArrayUtil.contains(
-							types, contentDashboardItemAction.getType())
-					).collect(
-						Collectors.toList()
-					);
+							types, contentDashboardItemAction.getType()));
 				}
 
 				@Override
@@ -812,6 +803,11 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 				@Override
 				public String getDescription(Locale locale) {
 					return "My very important description";
+				}
+
+				@Override
+				public long getId() {
+					return 123456;
 				}
 
 				@Override
@@ -863,12 +859,12 @@ public class GetContentDashboardItemInfoMVCResourceCommandTest {
 
 				@Override
 				public long getUserId() {
-					return userId;
+					return finalUserId;
 				}
 
 				@Override
 				public String getUserName() {
-					return userName;
+					return finalUserName;
 				}
 
 				@Override

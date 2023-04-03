@@ -5,6 +5,7 @@ import {AppProps} from '../../components/DashboardTable/DashboardTable';
 import {Footer} from '../../components/Footer/Footer';
 import {Header} from '../../components/Header/Header';
 import {AppDetailsPage} from '../AppDetailsPage/AppDetailsPage';
+import {MemberProps} from '../PublishedAppsDashboardPage/PublishedDashboardPageUtil';
 
 import './DashboardPage.scss';
 
@@ -19,11 +20,10 @@ export interface DashboardListItems {
 type DashBoardPageProps = {
 	accountAppsNumber: string;
 	accountLogo: string;
-	accountTitle: string;
-	buttonMessage: string;
+	accounts: AccountBrief[];
+	buttonMessage?: string;
 	children: ReactNode;
 	dashboardNavigationItems: DashboardListItems[];
-	items: AppProps[];
 	messages: {
 		description: string;
 		emptyStateMessage: {
@@ -39,7 +39,7 @@ type DashBoardPageProps = {
 export function DashboardPage({
 	accountAppsNumber,
 	accountLogo,
-	accountTitle,
+	accounts,
 	buttonMessage,
 	children,
 	dashboardNavigationItems,
@@ -55,7 +55,7 @@ export function DashboardPage({
 					<DashboardNavigation
 						accountAppsNumber={accountAppsNumber}
 						accountIcon={accountLogo}
-						accountTitle={accountTitle}
+						accounts={accounts}
 						dashboardNavigationItems={dashboardNavigationItems}
 						onSelectAppChange={setSelectedApp}
 						setDashboardNavigationItems={
@@ -77,11 +77,13 @@ export function DashboardPage({
 									title={messages.title}
 								/>
 
-								<a href="/create-new-app">
-									<button className="dashboard-page-body-header-button">
-										{buttonMessage}
-									</button>
-								</a>
+								{buttonMessage && (
+									<a href="/create-new-app">
+										<button className="dashboard-page-body-header-button">
+											{buttonMessage}
+										</button>
+									</a>
+								)}
 							</div>
 
 							{children}

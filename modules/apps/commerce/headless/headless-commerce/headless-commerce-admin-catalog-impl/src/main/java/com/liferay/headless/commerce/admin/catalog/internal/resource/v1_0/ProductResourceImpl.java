@@ -20,6 +20,8 @@ import com.liferay.asset.kernel.service.AssetTagService;
 import com.liferay.commerce.account.model.CommerceAccountGroup;
 import com.liferay.commerce.account.service.CommerceAccountGroupRelService;
 import com.liferay.commerce.account.service.CommerceAccountGroupService;
+import com.liferay.commerce.price.list.service.CommercePriceEntryLocalService;
+import com.liferay.commerce.price.list.service.CommercePriceListLocalService;
 import com.liferay.commerce.product.configuration.CProductVersionConfiguration;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.exception.NoSuchCPDefinitionException;
@@ -27,6 +29,7 @@ import com.liferay.commerce.product.exception.NoSuchCatalogException;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPDefinitionOptionRel;
+import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.model.CommerceCatalog;
 import com.liferay.commerce.product.model.CommerceChannel;
@@ -69,7 +72,6 @@ import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductSubscriptionC
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.ProductTaxConfiguration;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.RelatedProduct;
 import com.liferay.headless.commerce.admin.catalog.dto.v1_0.Sku;
-import com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.converter.ProductDTOConverter;
 import com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.util.CustomFieldsUtil;
 import com.liferay.headless.commerce.admin.catalog.internal.helper.v1_0.ProductHelper;
 import com.liferay.headless.commerce.admin.catalog.internal.odata.entity.v1_0.ProductEntityModel;
@@ -115,6 +117,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.search.expando.ExpandoBridgeIndexer;
+import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.pagination.Page;
@@ -122,6 +125,8 @@ import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.upload.UniqueFileNameProvider;
 
 import java.io.Serializable;
+
+import java.math.BigDecimal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -724,6 +729,12 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 			contextAcceptLanguage.getPreferredLocale());
 	}
 
+	private Map<String, Serializable> _getExpandoBridgeAttributes(Sku sku) {
+		return CustomFieldsUtil.toMap(
+			CPInstance.class.getName(), contextCompany.getCompanyId(),
+			sku.getCustomFields(), contextAcceptLanguage.getPreferredLocale());
+	}
+
 	private ProductShippingConfiguration _getProductShippingConfiguration(
 		Product product) {
 
@@ -902,8 +913,25 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 
 		if (skus != null) {
 			for (Sku sku : skus) {
-				SkuUtil.addOrUpdateCPInstance(
-					_cpInstanceService, sku, cpDefinition, serviceContext);
+				serviceContext.setExpandoBridgeAttributes(
+					_getExpandoBridgeAttributes(sku));
+
+				CPInstance cpInstance = SkuUtil.addOrUpdateCPInstance(
+					_cpInstanceService, sku, cpDefinition,
+					_cpDefinitionOptionRelService,
+					_cpDefinitionOptionValueRelService, serviceContext);
+
+				serviceContext.setExpandoBridgeAttributes(null);
+
+				SkuUtil.updateCommercePriceEntries(
+					_commercePriceEntryLocalService,
+					_commercePriceListLocalService, _configurationProvider,
+					cpInstance,
+					(BigDecimal)GetterUtil.get(
+						sku.getPrice(), cpInstance.getPrice()),
+					(BigDecimal)GetterUtil.get(
+						sku.getPromoPrice(), cpInstance.getPromoPrice()),
+					serviceContext);
 			}
 		}
 
@@ -1318,6 +1346,12 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 	private CommerceChannelService _commerceChannelService;
 
 	@Reference
+	private CommercePriceEntryLocalService _commercePriceEntryLocalService;
+
+	@Reference
+	private CommercePriceListLocalService _commercePriceListLocalService;
+
+	@Reference
 	private ConfigurationProvider _configurationProvider;
 
 	@Reference
@@ -1388,8 +1422,10 @@ public class ProductResourceImpl extends BaseProductResourceImpl {
 	@Reference
 	private Portal _portal;
 
-	@Reference
-	private ProductDTOConverter _productDTOConverter;
+	@Reference(
+		target = "(component.name=com.liferay.headless.commerce.admin.catalog.internal.dto.v1_0.converter.ProductDTOConverter)"
+	)
+	private DTOConverter<CPDefinition, Product> _productDTOConverter;
 
 	@Reference
 	private ProductHelper _productHelper;

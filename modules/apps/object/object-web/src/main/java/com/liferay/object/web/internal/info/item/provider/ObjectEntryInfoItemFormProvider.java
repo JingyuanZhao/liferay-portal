@@ -36,6 +36,7 @@ import com.liferay.object.constants.ObjectFieldConstants;
 import com.liferay.object.constants.ObjectFieldValidationConstants;
 import com.liferay.object.constants.ObjectRelationshipConstants;
 import com.liferay.object.exception.NoSuchObjectDefinitionException;
+import com.liferay.object.field.setting.util.ObjectFieldSettingUtil;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectEntry;
 import com.liferay.object.model.ObjectField;
@@ -72,7 +73,10 @@ import java.math.BigDecimal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -231,7 +235,9 @@ public class ObjectEntryInfoItemFormProvider
 						objectField.getListTypeDefinitionId()),
 					listTypeEntry -> new MultiselectInfoFieldType.Option(
 						Objects.equals(
-							objectField.getDefaultValue(),
+							ObjectFieldSettingUtil.getDefaultValueAsString(
+								null, objectField.getObjectFieldId(),
+								_objectFieldSettingLocalService, null),
 							listTypeEntry.getKey()),
 						new FunctionInfoLocalizedValue<>(
 							listTypeEntry::getName),
@@ -494,6 +500,8 @@ public class ObjectEntryInfoItemFormProvider
 
 					unsafeConsumer.accept(
 						_getObjectDefinitionInfoFieldSet(
+							true, objectDefinition.getLabelMap(),
+							objectDefinition.getName(),
 							ObjectField.class.getSimpleName(),
 							objectDefinition));
 				}
@@ -557,6 +565,7 @@ public class ObjectEntryInfoItemFormProvider
 	}
 
 	private InfoFieldSet _getObjectDefinitionInfoFieldSet(
+		boolean editable, Map<Locale, String> labelMap, String name,
 		String namespace, ObjectDefinition objectDefinition) {
 
 		return InfoFieldSet.builder(
@@ -596,7 +605,7 @@ public class ObjectEntryInfoItemFormProvider
 							).name(
 								objectField.getName()
 							).editable(
-								true
+								editable
 							).labelInfoLocalizedValue(
 								InfoLocalizedValue.<String>builder(
 								).values(
@@ -611,10 +620,10 @@ public class ObjectEntryInfoItemFormProvider
 		).labelInfoLocalizedValue(
 			InfoLocalizedValue.<String>builder(
 			).values(
-				objectDefinition.getLabelMap()
+				labelMap
 			).build()
 		).name(
-			objectDefinition.getName()
+			name
 		).build();
 	}
 
@@ -631,7 +640,10 @@ public class ObjectEntryInfoItemFormProvider
 			options.add(
 				new SelectInfoFieldType.Option(
 					Objects.equals(
-						objectField.getDefaultValue(), listTypeEntry.getKey()),
+						ObjectFieldSettingUtil.getDefaultValueAsString(
+							null, objectField.getObjectFieldId(),
+							_objectFieldSettingLocalService, null),
+						listTypeEntry.getKey()),
 					new FunctionInfoLocalizedValue<>(listTypeEntry::getName),
 					listTypeEntry.getKey()));
 		}
@@ -672,8 +684,24 @@ public class ObjectEntryInfoItemFormProvider
 				continue;
 			}
 
+			Map<Locale, String> fieldSetLabelMap = new HashMap<>();
+
+			Map<Locale, String> labelMap = objectDefinition1.getLabelMap();
+
+			for (Map.Entry<Locale, String> entry : labelMap.entrySet()) {
+				Locale locale = entry.getKey();
+
+				fieldSetLabelMap.put(
+					locale,
+					StringBundler.concat(
+						objectRelationship.getLabel(locale), StringPool.SPACE,
+						StringPool.OPEN_PARENTHESIS, entry.getValue(),
+						StringPool.CLOSE_PARENTHESIS));
+			}
+
 			infoFieldSetEntries.add(
 				_getObjectDefinitionInfoFieldSet(
+					false, fieldSetLabelMap, objectRelationship.getName(),
 					StringBundler.concat(
 						ObjectRelationship.class.getSimpleName(),
 						StringPool.POUND, objectDefinition1.getName(),

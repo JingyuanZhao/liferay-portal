@@ -14,6 +14,7 @@
 
 package com.liferay.object.rest.internal.odata.filter.expression;
 
+import com.liferay.asset.entry.rel.model.AssetEntryAssetCategoryRelTable;
 import com.liferay.asset.kernel.model.AssetEntries_AssetTagsTable;
 import com.liferay.asset.kernel.model.AssetEntryTable;
 import com.liferay.asset.kernel.model.AssetTagTable;
@@ -51,6 +52,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.odata.entity.EntityField;
 import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.odata.filter.expression.BinaryExpression;
@@ -471,6 +473,15 @@ public class PredicateExpressionVisitorImpl
 						rights, String::valueOf, Object.class)));
 		}
 
+		if (_isTaxonomyCategoryIds(left)) {
+			return _getTaxonomyCategoryIdsPredicate(
+				objectDefinitionId,
+				AssetEntryAssetCategoryRelTable.INSTANCE.assetCategoryId.in(
+					TransformUtil.transformToArray(
+						rights, assetCategoryId -> (Long)assetCategoryId,
+						Long.class)));
+		}
+
 		return _getColumn(
 			left, objectDefinitionId
 		).in(
@@ -643,6 +654,13 @@ public class PredicateExpressionVisitorImpl
 				_getExpressionPredicate(
 					AssetTagTable.INSTANCE.name, operation, (String)right));
 		}
+		else if (_isTaxonomyCategoryIds(left)) {
+			predicate = _getTaxonomyCategoryIdsPredicate(
+				objectDefinitionId,
+				_getExpressionPredicate(
+					AssetEntryAssetCategoryRelTable.INSTANCE.assetCategoryId,
+					operation, (Long)right));
+		}
 		else {
 			ObjectField objectField = _objectFieldLocalService.fetchObjectField(
 				objectDefinitionId, String.valueOf(left));
@@ -673,6 +691,29 @@ public class PredicateExpressionVisitorImpl
 		}
 
 		return objectRelationship.getObjectDefinitionId2();
+	}
+
+	private Predicate _getTaxonomyCategoryIdsPredicate(
+		long objectDefinitionId,
+		com.liferay.petra.sql.dsl.expression.Expression<Boolean>
+			valueExpression) {
+
+		return _getColumn(
+			"id", objectDefinitionId
+		).in(
+			DSLQueryFactoryUtil.select(
+				AssetEntryTable.INSTANCE.classPK
+			).from(
+				AssetEntryTable.INSTANCE
+			).innerJoinON(
+				AssetEntryAssetCategoryRelTable.INSTANCE,
+				AssetEntryTable.INSTANCE.entryId.eq(
+					AssetEntryAssetCategoryRelTable.INSTANCE.assetEntryId
+				).and(
+					valueExpression
+				)
+			)
+		);
 	}
 
 	private Object _getValue(
@@ -724,7 +765,8 @@ public class PredicateExpressionVisitorImpl
 
 			if (Objects.equals(
 					objectFieldBusinessType.getDBType(),
-					ObjectFieldConstants.DB_TYPE_LONG)) {
+					ObjectFieldConstants.DB_TYPE_LONG) &&
+				Validator.isNumber(String.valueOf(value))) {
 
 				return GetterUtil.getLong(value);
 			}
@@ -752,6 +794,16 @@ public class PredicateExpressionVisitorImpl
 
 	private boolean _isKeywords(Object fieldName) {
 		if (fieldName.equals("keywords") &&
+			FeatureFlagManagerUtil.isEnabled("LPS-176651")) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean _isTaxonomyCategoryIds(Object fieldName) {
+		if (fieldName.equals("taxonomyCategoryIds") &&
 			FeatureFlagManagerUtil.isEnabled("LPS-176651")) {
 
 			return true;

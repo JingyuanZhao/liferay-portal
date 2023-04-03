@@ -1,3 +1,10 @@
+type AccountBrief = {
+	externalReferenceCode: string;
+	id: number;
+	image?: string;
+	name: string;
+};
+
 type Cart = {
 	accountId: number;
 	cartItems: CartItem[];
@@ -8,8 +15,8 @@ type CartItem = {
 	price: {
 		currency: string;
 		discount: number;
-		price: number;
 		finalPrice: number;
+		price: number;
 	};
 	productId: number;
 	quantity: number;
@@ -27,6 +34,23 @@ type Channel = {
 	siteGroupId: number;
 	type: string;
 };
+
+interface PlacedOrder {
+	account: string;
+	accountId: number;
+	author: string;
+	createDate: string;
+	id: number;
+	orderStatusInfo: {code: number; label: string; label_i18n: string};
+	placedOrderItems: PlacedOrderItems[];
+}
+
+interface PlacedOrderItems {
+	id: number;
+	name: string;
+	subscription: boolean;
+	thumbnail: string;
+}
 
 interface PostCartResponse {
 	account: string;
@@ -67,4 +91,8 @@ type SKU = {
 	price: number;
 	sku: string;
 	skuOptions: [];
+};
+
+type UserAccount = {
+	accountBriefs: AccountBrief[];
 };

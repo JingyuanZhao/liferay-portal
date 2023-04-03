@@ -1,5 +1,33 @@
 definition {
 
+	macro addCurrency {
+		if (!(isSet(currency))) {
+			var currency = "USD";
+		}
+
+		if (!(isSet(country))) {
+			var country = "global";
+		}
+
+		if (!(isSet(accountEntryName))) {
+			var accountEntryName = "Company Name 1";
+		}
+
+		JSONPRMAPI.addCurrency(
+			accountEntryName = ${accountEntryName},
+			country = ${country},
+			currency = ${currency});
+	}
+
+	macro changeMDFStatus {
+		var statusKey = StringUtil.lowerCase(${mdfStatus});
+
+		JSONPRMAPI.changeMDFStatus(
+			mdfStatus = ${mdfStatus},
+			requestId = ${requestId},
+			statusKey = ${statusKey});
+	}
+
 	macro createMDFRequest {
 		var totalCostOfExpense = 0;
 
@@ -124,6 +152,8 @@ definition {
 					expenseOption = ${expenseOption});
 			}
 		}
+
+		return ${requestId};
 	}
 
 }

@@ -8,9 +8,10 @@ import React, {ReactNode} from 'react';
 import {DashboardEmptyTable} from './DashboardEmptyTable';
 
 export type AppProps = {
+	externalReferenceCode: string;
 	image: string;
 	name: string;
-	rating: string;
+	productId: number;
 	selected: boolean;
 	status: string;
 	type: string;

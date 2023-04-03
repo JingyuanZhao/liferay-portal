@@ -1,5 +1,4 @@
 liferay-jethr0-oauth-application-headless-server:
-    homePageURL: http://localhost:58081
     name: Liferay Jethr0 OAuth Application Headless Server
     scopes:
         - C_Build.everything
@@ -7,6 +6,7 @@ liferay-jethr0-oauth-application-headless-server:
         - C_BuildRun.everything
         - C_Environment.everything
         - C_GitBranch.everything
+        - C_JenkinsMaster.everything
         - C_Project.everything
         - C_ProjectComparator.everything
         - C_ProjectPrioritizer.everything

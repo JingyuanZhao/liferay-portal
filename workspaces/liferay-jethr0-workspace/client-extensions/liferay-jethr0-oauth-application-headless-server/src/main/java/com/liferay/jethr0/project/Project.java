@@ -14,7 +14,7 @@
 
 package com.liferay.jethr0.project;
 
-import com.liferay.jethr0.builds.Build;
+import com.liferay.jethr0.build.Build;
 import com.liferay.jethr0.gitbranch.GitBranch;
 import com.liferay.jethr0.testsuite.TestSuite;
 
@@ -94,7 +94,7 @@ public interface Project {
 		}
 
 		public JSONObject getJSONObject() {
-			return new JSONObject("{\"key\":\"" + getKey() + "\"}");
+			return new JSONObject("{\"key\": \"" + getKey() + "\"}");
 		}
 
 		public String getKey() {
@@ -132,7 +132,7 @@ public interface Project {
 		}
 
 		public JSONObject getJSONObject() {
-			return new JSONObject("{\"key\":\"" + getKey() + "\"}");
+			return new JSONObject("{\"key\": \"" + getKey() + "\"}");
 		}
 
 		public String getKey() {

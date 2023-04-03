@@ -64,6 +64,7 @@ definition {
 			actionName = ${actionName},
 			active = ${active},
 			click = "save",
+			errorMessage = ${errorMessage},
 			fieldName = ${fieldName},
 			inputExpression = ${inputExpression},
 			inputMethod = ${inputMethod},
@@ -109,11 +110,13 @@ definition {
 			fieldName = ${fieldName},
 			fieldType = ${fieldType},
 			fileSource = ${fileSource},
+			formulaScript = ${formulaScript},
 			indexed = ${indexed},
 			indexedAsKeyword = ${indexedAsKeyword},
 			indexedLanguageId = ${indexedLanguageId},
 			isRequired = ${isRequired},
 			objectName = ${objectName},
+			outputOption = ${outputOption},
 			picklistName = ${picklistName},
 			showFilesInDocumentsAndMedia = ${showFilesInDocumentsAndMedia},
 			userEmailAddress = ${userEmailAddress},
@@ -311,12 +314,16 @@ definition {
 	}
 
 	macro addObjectSingleFieldEntryViaAPI {
-		JSONObject.addObjectSingleFieldEntry(
+		var objectEntryId = JSONObject.addObjectSingleFieldEntry(
 			fieldName = ${fieldName},
 			objectName = ${objectName},
 			userEmailAddress = ${userEmailAddress},
 			userPassword = ${userPassword},
 			value = ${value});
+
+		return ${objectEntryId};
+
+		echo(${objectEntryId});
 	}
 
 	macro addObjectStringFieldEntryViaUI {
@@ -832,7 +839,8 @@ definition {
 			objectName = ${objectName},
 			token = ${token},
 			userEmailAddress = ${userEmailAddress},
-			userPassword = ${userPassword});
+			userPassword = ${userPassword},
+			virtualHost = ${virtualHost});
 	}
 
 	macro deleteRelationshipViaUI {
@@ -952,6 +960,8 @@ definition {
 	}
 
 	macro fillObjectAction {
+		var key_text = "Message";
+
 		if (isSet(actionLabel)) {
 			Type(
 				locator1 = "ObjectAdmin#ACTION_LABEL_FIELD",
@@ -1017,6 +1027,12 @@ definition {
 						locator1 = "ObjectAction#INPUT_NEW_VALUE",
 						value1 = ${inputExpressionValue});
 				}
+
+				if (IsElementPresent(locator1 = "TextInput#ANY")) {
+					Type(
+						locator1 = "TextInput#ANY",
+						value1 = ${errorMessage});
+				}
 			}
 
 			if (${thenAction} == "Update an Object Entry") {
@@ -1077,6 +1093,12 @@ definition {
 			Type(
 				locator1 = "ObjectAdmin#ACTION_SECRET_FIELD",
 				value1 = ${secretAction});
+		}
+
+		if (IsElementPresent(locator1 = "ObjectAction#ADD_ERROR_MESSAGE_VALIDATION")) {
+			Type(
+				locator1 = "ObjectAction#ADD_ERROR_MESSAGE_VALIDATION",
+				value1 = ${errorMessage});
 		}
 
 		if (isSet(click)) {
@@ -1335,6 +1357,10 @@ definition {
 			locator1 = "ObjectAdmin#OBJECT_KEBAB_MENU");
 
 		MenuItem.click(menuItem = ${kebabOption});
+	}
+
+	macro setAccountRestrictionViaAPI {
+		JSONObject.setAccountRestriction(objectName = ${objectName});
 	}
 
 	macro viewCategorizationInObjectEntry {

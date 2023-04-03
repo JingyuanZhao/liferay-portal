@@ -1099,11 +1099,11 @@ public class JournalDisplayContext {
 		_journalHelper = (JournalHelper)httpServletRequest.getAttribute(
 			JournalHelper.class.getName());
 		_journalWebConfiguration =
-			(JournalWebConfiguration)_httpServletRequest.getAttribute(
+			(JournalWebConfiguration)httpServletRequest.getAttribute(
 				JournalWebConfiguration.class.getName());
 		_portalPreferences = PortletPreferencesFactoryUtil.getPortalPreferences(
-			_httpServletRequest);
-		_themeDisplay = (ThemeDisplay)_httpServletRequest.getAttribute(
+			httpServletRequest);
+		_themeDisplay = (ThemeDisplay)httpServletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 	}
 
@@ -1461,7 +1461,6 @@ public class JournalDisplayContext {
 		attributes.put(Field.DESCRIPTION, getKeywords());
 		attributes.put(Field.STATUS, getStatus());
 		attributes.put(Field.TITLE, getKeywords());
-		attributes.put("ddmStructureKey", getDDMStructureKey());
 		attributes.put("head", !showVersions);
 		attributes.put("latest", !showVersions);
 		attributes.put(
@@ -1474,6 +1473,13 @@ public class JournalDisplayContext {
 		attributes.put("showNonindexable", !showVersions);
 
 		searchContext.setAttributes(attributes);
+
+		long ddmStructureId = ParamUtil.getLong(
+			_httpServletRequest, "ddmStructureId");
+
+		if (ddmStructureId > 0) {
+			searchContext.setClassTypeIds(new long[] {ddmStructureId});
+		}
 
 		searchContext.setCompanyId(_themeDisplay.getCompanyId());
 		searchContext.setEnd(end);

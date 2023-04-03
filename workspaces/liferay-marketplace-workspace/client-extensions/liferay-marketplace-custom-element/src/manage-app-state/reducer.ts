@@ -96,14 +96,11 @@ export function appReducer(state: InitialStateProps, action: TAction) {
 			return {...state, appName};
 		}
 		case TYPES.UPDATE_APP_NOTES: {
-			const {id, value} = action.payload;
+			const {value} = action.payload;
 
 			return {
 				...state,
-				appNotes: {
-					id,
-					value,
-				},
+				appNotes: value,
 			};
 		}
 		case TYPES.UPDATE_APP_PRICE_MODEL: {
@@ -139,7 +136,9 @@ export function appReducer(state: InitialStateProps, action: TAction) {
 			};
 		}
 		case TYPES.UPDATE_APP_TAGS: {
-			return state;
+			const appTags = action.payload.value;
+
+			return {...state, appTags};
 		}
 		case TYPES.UPDATE_APP_TRIAL_INFO: {
 			const dayTrial = action.payload.value;
@@ -158,16 +157,20 @@ export function appReducer(state: InitialStateProps, action: TAction) {
 			};
 		}
 		case TYPES.UPDATE_APP_VERSION: {
-			const {id, value} = action.payload;
+			const {value} = action.payload;
 
 			return {
 				...state,
-				appVersion: {
-					id,
-					value,
-				},
+				appVersion: value,
 			};
 		}
+
+		case TYPES.UPDATE_SKU_ID: {
+			const id = action.payload.value;
+
+			return {...state, skuId: id};
+		}
+
 		default:
 			return state;
 	}

@@ -22,7 +22,9 @@ import {ClayTooltipProvider} from '@clayui/tooltip';
 import {API, Input} from '@liferay/object-js-components-web';
 import React, {useEffect, useState} from 'react';
 
+import {defaultLanguageId} from '../../utils/constants';
 import {toCamelCase} from '../../utils/string';
+import PicklistDefaultValueSelect from './DefaultValueFields/PicklistDefaultValueSelect';
 import ObjectFieldFormBase from './ObjectFieldFormBase';
 import {useObjectFieldForm} from './useObjectFieldForm';
 
@@ -35,15 +37,15 @@ interface IModal extends IProps {
 
 interface IProps {
 	apiURL: string;
+	creationLanguageId: Liferay.Language.Locale;
 	objectDefinitionExternalReferenceCode: string;
 	objectFieldTypes: ObjectFieldType[];
 	objectName: string;
 }
 
-const defaultLanguageId = Liferay.ThemeDisplay.getDefaultLanguageId();
-
 function ModalAddObjectField({
 	apiURL,
+	creationLanguageId,
 	objectDefinitionExternalReferenceCode,
 	objectFieldTypes,
 	objectName,
@@ -164,6 +166,25 @@ function ModalAddObjectField({
 								</div>
 							)}
 					</ObjectFieldFormBase>
+
+					{values.state && (
+						<PicklistDefaultValueSelect
+							creationLanguageId={creationLanguageId}
+							defaultValue={
+								Liferay.FeatureFlags['LPS-163716']
+									? values.objectFieldSettings?.find(
+											(setting) =>
+												setting.name === 'defaultValue'
+									  )?.value
+									: values.defaultValue
+							}
+							error={errors.defaultValue}
+							label={Liferay.Language.get('default-value')}
+							required
+							setValues={setValues}
+							values={values}
+						/>
+					)}
 				</ClayModal.Body>
 
 				<ClayModal.Footer
@@ -189,6 +210,7 @@ function ModalAddObjectField({
 
 export default function AddObjectField({
 	apiURL,
+	creationLanguageId,
 	objectDefinitionExternalReferenceCode,
 	objectFieldTypes,
 	objectName,
@@ -215,6 +237,7 @@ export default function AddObjectField({
 			{isVisible && (
 				<ModalAddObjectField
 					apiURL={apiURL}
+					creationLanguageId={creationLanguageId}
 					objectDefinitionExternalReferenceCode={
 						objectDefinitionExternalReferenceCode
 					}

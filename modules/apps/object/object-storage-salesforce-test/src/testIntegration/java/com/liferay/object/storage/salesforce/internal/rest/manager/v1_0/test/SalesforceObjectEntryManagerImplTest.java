@@ -120,7 +120,7 @@ public class SalesforceObjectEntryManagerImplTest {
 
 		_objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
-				_user.getUserId(), false,
+				_user.getUserId(), false, false,
 				LocalizedMapUtil.getLocalizedMap("Ticket"), "Ticket", null,
 				null, LocalizedMapUtil.getLocalizedMap("Tickets"),
 				ObjectDefinitionConstants.SCOPE_COMPANY,
@@ -131,15 +131,16 @@ public class SalesforceObjectEntryManagerImplTest {
 			null, _user.getUserId(), 0,
 			_objectDefinition.getObjectDefinitionId(),
 			ObjectFieldConstants.BUSINESS_TYPE_TEXT,
-			ObjectFieldConstants.DB_TYPE_STRING, null, false, false, null,
-			LocalizedMapUtil.getLocalizedMap("Title"), "title", false, false,
-			Collections.emptyList());
+			ObjectFieldConstants.DB_TYPE_STRING, false, false, null,
+			LocalizedMapUtil.getLocalizedMap("Title"), false, "title", false,
+			false, Collections.emptyList());
 
 		_objectFieldLocalService.updateCustomObjectField(
 			"Title__c", objectField.getObjectFieldId(), 0,
-			objectField.getBusinessType(), objectField.getDBType(), null, false,
-			false, null, objectField.getLabelMap(), objectField.getName(),
-			false, false, objectField.getObjectFieldSettings());
+			objectField.getBusinessType(), objectField.getDBType(), false,
+			false, null, objectField.getLabelMap(), false,
+			objectField.getName(), false, false,
+			objectField.getObjectFieldSettings());
 
 		_objectDefinition.setExternalReferenceCode("Ticket__c");
 		_objectDefinition.setTitleObjectFieldId(objectField.getObjectFieldId());
