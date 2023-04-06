@@ -882,6 +882,7 @@ definition {
 	@description = "This is a use case for LPS-88893."
 	@priority = 3
 	test ImportLARWithTheSameTitle {
+		property portal.upstream = "jessie";
 		property testray.component.names = "Training";
 
 		HeadlessSite.addSite(siteName = "Site Name 1");
@@ -907,6 +908,24 @@ definition {
 		LAR.importPortlet(larFileName = "WebContent_portlet.lar");
 
 		AssertConsoleTextNotPresent(value1 = "DuplicateFriendlyURLEntryException");
+
+		var mysqlStatement = "SELECT backgroundTaskId FROM BackgroundTask WHERE taskExecutorClassName in ('com.liferay.exportimport.internal.background.task.PortletImportBackgroundTaskExecutor') AND STATUS IN (3, 5);";
+
+		var sqlResults = SQL.executeMySQLStatement(mysqlStatement = ${mysqlStatement});
+
+		var backgroundTaskId = StringUtil.regexReplaceAll(${sqlResults}, "[backgroundTaskId\n]", "");
+
+		echo("## * backgroundTaskId is: ${backgroundTaskId}");
+
+		var mysqlStatement = "UPDATE BackgroundTask SET modifiedDate = '2023-03-20 04:20:24.321000' WHERE (backgroundTaskId = ${backgroundTaskId});";
+
+		var sqlResults = SQL.executeMySQLStatement(mysqlStatement = ${mysqlStatement});
+
+		echo("## * SQL Query Result is: ${sqlResults}");
+
+		if (!(contains(${sqlResults}, "successfully"))) {
+			fail("The modifiedDate of the portlet background task failed to modify.");
+		}
 	}
 
 	@priority = 5
