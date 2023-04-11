@@ -2465,24 +2465,34 @@ definition {
 	test ImportCorruptedFile {
 		property portal.acceptance = "true";
 		property portal.release = "false";
+		property portal.upstream = "jessie";
 
 		task ("When: User tries to import corrupted LAR file in Bookmarks") {
-			Navigator.openURL();
+			JSONLayout.addPublicLayout(
+				groupName = "Guest",
+				layoutName = "Page Name");
 
-			ProductMenu.gotoPortlet(
-				category = "Content & Data",
-				portlet = "Bookmarks");
-
-			AssertTextEquals(
-				locator1 = "Portlet#HEADER",
-				value1 = "Bookmarks");
+			LAR.exportSiteCP(
+				larFileName = "ExportGuest",
+				siteScopeName = "Guest");
 		}
 
-		task ("Then: Import process should fail") {
-			LAR.importPortlet(
-				cannotImport = "true",
-				larFileName = "bookmarks-corrupted.portlet.lar",
-				uploadFrom = "dependencies");
+		var mysqlStatement = "SELECT backgroundTaskId FROM BackgroundTask WHERE taskExecutorClassName in ('com.liferay.exportimport.internal.background.task.LayoutExportBackgroundTaskExecutor') AND STATUS IN (3, 5);";
+
+		var sqlResults = SQL.executeMySQLStatement(mysqlStatement = ${mysqlStatement});
+
+		var backgroundTaskId = StringUtil.regexReplaceAll(${sqlResults}, "[backgroundTaskId\n]", "");
+
+		echo("## * backgroundTaskId is: ${backgroundTaskId}");
+
+		var mysqlStatement = "UPDATE BackgroundTask SET createDate = '2023-03-20 04:20:24.321000' WHERE (backgroundTaskId = ${backgroundTaskId});";
+
+		var sqlResults = SQL.executeMySQLStatement(mysqlStatement = ${mysqlStatement});
+
+		echo("## * sqlResults is: ${sqlResults}");
+
+		if (!(contains(${sqlResults}, "Changed: 1"))) {
+			fail("The createDate of the layout background task failed to modify.");
 		}
 	}
 
