@@ -98,6 +98,7 @@ definition {
 	@priority = 4
 	test UserGroupSiteTemplates {
 		property custom.properties = "jsonws.web.service.paths.excludes=";
+		property portal.upstream = "jessie";
 		property test.name.skip.portal.instance = "UsergroupsUsecase#UserGroupSiteTemplates";
 
 		SiteTemplates.addCP(
