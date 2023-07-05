@@ -257,7 +257,7 @@ definition {
 
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-		if ((IsElementNotPresent(locator1 = "Permissions#${permissionDefinitionKey}")) && (IsEditable(locator1 = "Pagination#NEXT_LINK"))) {
+		if ((IsElementNotPresent(locator1 = "Permissions#${permissionDefinitionKey}")) && (IsElementPresent(locator1 = "Pagination#NEXT_LINK"))) {
 			Pagination.changePagination(itemsPerPage = 60);
 		}
 
