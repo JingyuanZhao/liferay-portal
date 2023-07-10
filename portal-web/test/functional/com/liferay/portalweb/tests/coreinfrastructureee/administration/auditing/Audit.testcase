@@ -46,6 +46,186 @@ definition {
 		}
 	}
 
+	@description = "This is a use case for LPS-176997. TC-1: Verify MALU, APV and Scope are enabled on default instance when a LXC environment is being set up."
+	@priority = 5
+	test AssertAuditHeadersOnDefaultInstance {
+		property liferay.online.properties = "true";
+		property portal.upstream = "jessie";
+		property test.liferay.virtual.instance = "false";
+
+		task ("Given: Add the OSGI configuration file") {
+			HeadlessSite.addSite(siteName = "Site Name");
+
+			var groupId = JSONGroupAPI._getGroupIdByName(
+				groupName = "Site Name",
+				site = "true");
+
+			JSONLayout.addPublicLayout(
+				groupName = "Site Name",
+				layoutName = "Page Name");
+
+			JSONUser.addUser(
+				userEmailAddress = "userea@liferay.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				requireReset = "false",
+				userEmailAddress = "userea@liferay.com");
+
+			User.logoutPG();
+		}
+
+		task ("When: Verify that console outputs the correct clientIP when reading of the X-Forwarded-For http header") {
+			var baseSiteURL = "http://localhost:8080/web/site-name/page-name";
+
+			Navigator.openSpecificURL(url = ${baseSiteURL});
+
+			var curl = '''${baseSiteURL} -X HEAD -I''';
+
+			var response = JSONCurlUtil.post(${curl});
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Guest-User: true");
+
+			User.firstLoginPG(
+				password = "test",
+				userEmailAddress = "userea@liferay.com");
+
+			Navigator.openSpecificURL(url = "http://localhost:8080/web/site-name/page-name");
+		}
+
+		task ("Then: Verify that console outputs the correct clientIP when reading of the X-Forwarded-For http header") {
+			var response = JSONCurlUtil.post(${curl});
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Company: 20096");
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Group: ${groupId}");
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Guest-User: false");
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-User");
+		}
+	}
+
+	@description = "This is a use case for LPS-176997. TC-2: Verify MALU, APV and Scope are enabled on virtual instance when a LXC environment is being set up."
+	@priority = 5
+	test AssertAuditHeadersOnVirtualInstance {
+		property liferay.online.properties = "true";
+		property portal.upstream = "jessie";
+		property test.liferay.virtual.instance = "false";
+
+		task ("Given: Add the OSGI configuration file") {
+			HeadlessPortalInstanceAPI.addPortalInstance(
+				domain = "www.able.com",
+				portalInstanceId = "www.able.com",
+				virtualHost = "www.able.com");
+
+			User.logoutPG();
+
+			User.firstLoginPG(
+				password = "test",
+				userEmailAddress = "test@www.able.com",
+				virtualHostsURL = "http://www.able.com:8080");
+
+			HeadlessSite.addSite(
+				portalURL = "http://www.able.com:8080",
+				siteName = "Site Name",
+				userEmailAddress = "test@www.able.com",
+				userPassword = "test");
+
+			PagesAdmin.openPagesAdmin(
+				baseURL = "http://www.able.com:8080",
+				siteURLKey = "site-name");
+
+			PagesAdmin.addPage(
+				pageName = "Page Name",
+				sitePageType = "Widget Page");
+
+			var companyId = JSONCompany.getCompanyId(portalInstanceName = "www.able.com");
+			var groupId = JSONGroupAPI._getGroupIdByNameViaOtherUser(
+				creatorEmailAddress = "test@www.able.com",
+				creatorPassword = "test",
+				groupName = "Site Name",
+				portalInstanceName = "www.able.com",
+				portalURL = "http://www.able.com:8080",
+				site = "true");
+
+			JSONUser.addUser(
+				creatorEmailAddress = "test@www.able.com",
+				creatorPassword = "test",
+				portalInstanceName = "www.able.com",
+				specificURL = "http://www.able.com:8080",
+				userEmailAddress = "userea@www.able.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				creatorEmailAddress = "test@www.able.com",
+				creatorPassword = "test",
+				portalInstanceName = "www.able.com",
+				requireReset = "false",
+				specificURL = "http://www.able.com:8080",
+				userEmailAddress = "userea@www.able.com");
+
+			User.logoutPG(specificURL = "http://www.able.com:8080");
+		}
+
+		task ("When: Verify that console outputs the correct clientIP when reading of the X-Forwarded-For http header") {
+			var baseSiteURL = "http://www.able.com:8080/web/site-name/page-name";
+
+			Navigator.openSpecificURL(url = ${baseSiteURL});
+
+			var curl = '''${baseSiteURL} -X HEAD -I''';
+
+			var response = JSONCurlUtil.post(${curl});
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Guest-User: true");
+
+			User.firstLoginPG(
+				password = "test",
+				userEmailAddress = "userea@www.able.com",
+				virtualHostsURL = "http://www.able.com:8080");
+
+			Navigator.openSpecificURL(url = ${baseSiteURL});
+		}
+
+		task ("Then: Verify that console outputs the correct clientIP when reading of the X-Forwarded-For http header") {
+			var response = JSONCurlUtil.post(${curl});
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Company: ${companyId}");
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Group: ${groupId}");
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-Guest-User: false");
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "X-Liferay-Request-User:");
+		}
+	}
+
 	@description = "This is a use case for LPS-155728. TC-1: Assert the email address is present in the audit log context in a human-readable format."
 	@priority = 2
 	test AssertEmailAddressIsPresentInReadable {
