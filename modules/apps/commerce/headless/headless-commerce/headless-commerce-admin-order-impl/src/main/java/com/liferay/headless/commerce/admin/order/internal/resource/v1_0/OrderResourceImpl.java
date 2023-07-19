@@ -28,7 +28,6 @@ import com.liferay.commerce.model.CommerceOrderItem;
 import com.liferay.commerce.model.CommerceOrderType;
 import com.liferay.commerce.model.CommerceShippingMethod;
 import com.liferay.commerce.order.engine.CommerceOrderEngine;
-import com.liferay.commerce.payment.engine.CommercePaymentEngine;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPInstanceService;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
@@ -51,7 +50,6 @@ import com.liferay.headless.commerce.admin.order.resource.v1_0.OrderResource;
 import com.liferay.headless.commerce.core.util.DateConfig;
 import com.liferay.headless.commerce.core.util.ExpandoUtil;
 import com.liferay.headless.commerce.core.util.ServiceContextHelper;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
@@ -821,12 +819,6 @@ public class OrderResourceImpl extends BaseOrderResourceImpl {
 					order.getPrintedNote(), commerceOrder.getPrintedNote()));
 		}
 
-		commerceOrder = _commercePaymentEngine.updateOrderPaymentStatus(
-			commerceOrder.getCommerceOrderId(),
-			GetterUtil.getInteger(
-				order.getPaymentStatus(), commerceOrder.getPaymentStatus()),
-			commerceOrder.getTransactionId(), StringPool.BLANK);
-
 		Map<String, ?> customFields = order.getCustomFields();
 
 		if ((customFields != null) && !customFields.isEmpty()) {
@@ -885,9 +877,6 @@ public class OrderResourceImpl extends BaseOrderResourceImpl {
 
 	@Reference
 	private CommerceOrderTypeService _commerceOrderTypeService;
-
-	@Reference
-	private CommercePaymentEngine _commercePaymentEngine;
 
 	@Reference
 	private CommerceShippingMethodService _commerceShippingMethodService;
