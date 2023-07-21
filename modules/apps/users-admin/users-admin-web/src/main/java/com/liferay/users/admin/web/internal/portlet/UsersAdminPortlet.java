@@ -61,12 +61,12 @@ public class UsersAdminPortlet extends MVCPortlet {
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws IOException, PortletException {
 
-		renderRequest.setAttribute(ItemSelector.class.getName(), itemSelector);
+		renderRequest.setAttribute(ItemSelector.class.getName(), _itemSelector);
 
 		super.render(renderRequest, renderResponse);
 	}
 
 	@Reference
-	protected ItemSelector itemSelector;
+	private ItemSelector _itemSelector;
 
 }
