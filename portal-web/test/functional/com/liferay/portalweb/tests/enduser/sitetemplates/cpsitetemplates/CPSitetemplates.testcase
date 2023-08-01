@@ -773,11 +773,13 @@ definition {
 		}
 
 		task ("Then: User can view and edit child content page in the site") {
-			PagesAdmin.openPagesAdmin(siteURLKey = "site-template-site-name");
+			Navigator.openSiteURL(siteName = "Site Template Site Name");
 
 			Refresh();
 
 			// Remove Refresh(); after LPS-172741
+
+			PagesAdmin.openPagesAdmin(siteURLKey = "site-template-site-name");
 
 			Click(
 				key_pageName = "Parent Content Page",
