@@ -775,9 +775,11 @@ definition {
 		task ("Then: User can view and edit child content page in the site") {
 			PagesAdmin.openPagesAdmin(siteURLKey = "site-template-site-name");
 
-			Refresh();
+			while (IsElementNotPresent(key_itemName = "Parent Content Page", locator1 = "PagesAdmin#LIST_GROUP_ITEM")) {
+				Refresh();
 
-			// Remove Refresh(); after LPS-172741
+				// Remove Refresh(); after LPS-172741
+			}
 
 			Click(
 				key_pageName = "Parent Content Page",
