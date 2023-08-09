@@ -864,7 +864,7 @@ definition {
 				osgiConfigFileName = "com.liferay.exportimport.configuration.ExportImportServiceConfiguration.scoped~companyId.config",
 				osgiConfigs = "companyId=L\"${companyId}\",includeThumbnailsAndPreviewsDuringStaging=B\"false\"");
 
-			OSGiConfig.waitForOSGiConfig();			
+			OSGiConfig.waitForOSGiConfig();
 
 			StagingNavigator.openToConfigInSystemSettings(portlet = "Export/Import, Staging");
 
