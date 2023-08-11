@@ -752,12 +752,9 @@ definition {
 
 		task ("When: Adds a parent content page and a child content page to the created site template") {
 			SiteTemplates.addSitePageViaSiteTemplateCP(
-				masterLayoutName = "Blank",
 				pageName = "Parent Content Page",
 				sitePageType = "Content Page",
 				siteTemplateName = "Site Template Name");
-
-			SelectFrameTop();
 
 			PageEditor.publish();
 
@@ -767,17 +764,23 @@ definition {
 				sitePageType = "Content Page",
 				siteTemplateName = "Site Template Name");
 
-			SelectFrameTop();
-
 			PageEditor.publish();
 		}
 
 		task ("Then: User can view and edit child content page in the site") {
-			PagesAdmin.openPagesAdmin(siteURLKey = "site-template-site-name");
+			Navigator.openSiteURL(siteName = "Site Template Site Name");
 
-			Refresh();
+			ProductMenu.gotoPortlet(
+				category = "Site Builder",
+				portlet = "Pages");
 
-			// Remove Refresh(); after LPS-172741
+			while (IsElementNotPresent(key_itemName = "Parent Content Page", locator1 = "PagesAdmin#LIST_GROUP_ITEM")) {
+				Refresh();
+
+				// Add refresh and pause due to LPS-172741, wait for the new created content page to display.
+
+				Pause(locator1 = 1000);
+			}
 
 			Click(
 				key_pageName = "Parent Content Page",
