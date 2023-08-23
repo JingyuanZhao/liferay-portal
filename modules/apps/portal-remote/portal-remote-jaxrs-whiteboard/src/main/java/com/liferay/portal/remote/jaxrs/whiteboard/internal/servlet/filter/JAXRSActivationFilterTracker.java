@@ -14,11 +14,11 @@ import javax.servlet.Filter;
 import javax.servlet.ServletException;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Shuyang Zhou
@@ -28,6 +28,8 @@ public class JAXRSActivationFilterTracker {
 
 	@Activate
 	protected void activate(BundleContext bundleContext) {
+		_bundleContext = bundleContext;
+
 		_countDownLatch = new CountDownLatch(1);
 
 		_filterServiceRegistration = bundleContext.registerService(
@@ -48,6 +50,10 @@ public class JAXRSActivationFilterTracker {
 	@Deactivate
 	protected synchronized void deactivate() {
 		_unregister();
+
+		if (_serviceReference != null) {
+			_bundleContext.ungetService(_serviceReference);
+		}
 	}
 
 	protected synchronized void setReady() throws ServletException {
@@ -58,9 +64,20 @@ public class JAXRSActivationFilterTracker {
 			throw new ServletException(interruptedException);
 		}
 
-		_jaxrsLifecycle.ensureReady();
+		_ensureJAXRSReady();
 
 		_unregister();
+	}
+
+	private void _ensureJAXRSReady() {
+		if (!_jaxrsReady) {
+			_jaxrsReady = true;
+
+			_serviceReference = _bundleContext.getServiceReference(
+				JAXRSLifecycle.class);
+
+			_bundleContext.getService(_serviceReference);
+		}
 	}
 
 	private void _unregister() {
@@ -71,10 +88,10 @@ public class JAXRSActivationFilterTracker {
 		}
 	}
 
+	private BundleContext _bundleContext;
 	private CountDownLatch _countDownLatch;
 	private ServiceRegistration<Filter> _filterServiceRegistration;
-
-	@Reference
-	private JAXRSLifecycle _jaxrsLifecycle;
+	private boolean _jaxrsReady;
+	private ServiceReference<JAXRSLifecycle> _serviceReference;
 
 }
