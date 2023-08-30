@@ -189,9 +189,14 @@ definition {
 
 		PortletEntry.publish();
 
-		PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
+		JSONLayout.addPublicLayout(
+			groupName = "Site Name",
+			layoutName = "Test Content Page Name",
+			type = "content");
 
-		ContentPages.addPage(pageName = "Test Content Page Name");
+		ContentPagesNavigator.openEditContentPage(
+			pageName = "Test Content Page Name",
+			siteName = "Site Name");
 
 		PageEditor.addFragment(
 			collectionName = "Collection Name",
