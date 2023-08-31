@@ -10,6 +10,7 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * @author Raymond Augé
  */
+@ExtendedObjectClassDefinition(generateUI = false)
 @Meta.OCD(
 	factory = true,
 	id = "com.liferay.oauth2.provider.configuration.OAuth2ProviderApplicationHeadlessServerConfiguration"
