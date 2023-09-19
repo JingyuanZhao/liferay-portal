@@ -1336,7 +1336,7 @@ definition {
 				Navigator.gotoLoginPage();
 			}
 
-			AssertConsoleTextPresent(value1 = "org.opensaml.messaging.handler.MessageHandlerException: Message context was not authenticated");
+			WaitForConsoleTextPresent(value1 = "org.opensaml.messaging.handler.MessageHandlerException: Message context was not authenticated");
 		}
 	}
 
