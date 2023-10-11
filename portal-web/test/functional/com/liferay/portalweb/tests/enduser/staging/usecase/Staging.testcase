@@ -1947,6 +1947,7 @@ definition {
 	@description = "This is a use case for LPS-131578 and LPS-149374. Users can configure the portal to exclude displayed contents from publishing."
 	@priority = 3
 	test PublishViaPortletWithoutContent {
+		property portal.upstream = "jessie";
 		property test.liferay.virtual.instance = "false";
 		property test.run.type = "single";
 

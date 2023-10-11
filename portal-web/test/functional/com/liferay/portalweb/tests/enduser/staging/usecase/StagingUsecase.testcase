@@ -1361,6 +1361,7 @@ definition {
 	@description = "This is a use case for LPS-149374. TC-3: Verify the state of portlets and contents in Live when publishing with Publish Displayed Content by Default and Replicate Individual Deletions."
 	@priority = 3
 	test PublishWithDefaultTrueAndReplicateIndividualDeletions {
+		property portal.upstream = "jessie";
 		property test.liferay.virtual.instance = "false";
 		property test.run.type = "single";
 
@@ -2371,6 +2372,8 @@ definition {
 	@description = "This is a use case for LPS-182704. TC-7 and TC-9: Verify that a confirmation pop-up should show up when Delete Application Data Before Importing checkbox is checked during Blogs and Forms portlet import process on live site"
 	@priority = 3
 	test ViewDeleteApplicationDataPopUpInBlogsAndFormsImportProgressOnLiveSite {
+		property portal.upstream = "jessie";
+
 		task ("Export blank Blogs lar from the default site and add a blog entry in staging site") {
 			BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
 
@@ -2449,6 +2452,8 @@ definition {
 	@description = "This is a use case for LPS-182704. TC-6 and TC-8: Verify that a confirmation pop-up should show up when Delete Application Data Before Importing checkbox is checked during Blogs and Forms portlet import process on staging site"
 	@priority = 3
 	test ViewDeleteApplicationDataPopUpInBlogsAndFormsImportProgressOnStagingSite {
+		property portal.upstream = "jessie";
+
 		task ("Export blank Blogs lar from the default site and add a blog entry in staging site") {
 			BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
 
