@@ -56,7 +56,7 @@ definition {
 	}
 
 	@summary = "Default summary"
-	macro getCompanyId(authenticationMethod = null,userScreenName = null) {
+	macro getCompanyId(authenticationMethod = null,userScreenName = null,portalURL = null) {
 		if (!(isSet(portalInstanceName)) || (${portalInstanceName} == "liferay.com")) {
 			var portalInstanceName = JSONCompany.getPortalInstanceName();
 		}

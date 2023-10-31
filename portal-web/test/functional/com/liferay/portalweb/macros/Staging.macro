@@ -1160,13 +1160,9 @@ definition {
 			var remotePort = 8080;
 		}
 
-		HeadlessSite.addSite(
+		var siteId = HeadlessSite.addSite(
 			portalURL = "http://localhost:${remotePort}",
 			siteName = "Remote Site");
-
-		var siteId = JSONGroupSetter.setGroupId(
-			groupName = "Remote Site",
-			portalURL = "http://localhost:${remotePort}");
 		var siteURLKey = ContentPagesNavigator._convertNameToKey(name = ${siteName});
 
 		Staging.openStagingAdmin(siteURLKey = ${siteURLKey});
@@ -1187,13 +1183,9 @@ definition {
 			var remotePort = 8080;
 		}
 
-		HeadlessSite.addSite(
+		var remoteGroupId = HeadlessSite.addSite(
 			portalURL = "http://localhost:${remotePort}",
 			siteName = "Remote Site");
-
-		var remoteGroupId = JSONGroupSetter.setGroupId(
-			groupName = "Remote Site",
-			portalURL = "http://localhost:${remotePort}");
 
 		JSONStaging.enableRemoteStaging(
 			branchingPrivate = ${branchingPrivate},
