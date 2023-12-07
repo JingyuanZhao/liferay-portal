@@ -28,7 +28,6 @@ definition {
 	@description = "This is a use case for LPS-190119 (TC-1 & TC-2 & TC-3). Admin User can Generate and Revoke SCIM Access Tokens."
 	@priority = 5
 	test AdminUserCanGenerateAndRevokeSCIMTokens {
-		property custom.properties = "feature.flag.LPS-96845=true";
 		property test.liferay.virtual.instance = "false";
 		property test.run.type = "single";
 
@@ -79,7 +78,6 @@ definition {
 	@description = "This is a use case for LPS-190119 (TC-2 & TC-5). Admin User can Generate and Revoke SCIM Access Tokens on a new Virtual Instance."
 	@priority = 5
 	test AdminUserCanGenerateAndRevokeSCIMTokensOnVirtualInstance {
-		property custom.properties = "feature.flag.LPS-96845=true";
 		property test.liferay.virtual.instance = "false";
 		property test.run.type = "single";
 
@@ -137,6 +135,105 @@ definition {
 				expected = "");
 
 			User.logoutPG();
+		}
+	}
+
+	@description = "This is a use case for LPS-198054. TC-1: Verify that the generated access token is valid for 1 year by default and the access token is no longer valid after the expiration date."
+	@priority = 5
+	test DefaultExpirationDateOfAccessTokenIsOneYear {
+		property test.liferay.virtual.instance = "false";
+		property test.run.type = "single";
+
+		task ("Given: Deploy the config file of the SCIM client") {
+			var companyId = JSONCompany.getCompanyId();
+			var portalURL = JSONCompany.getPortalURL();
+
+			OSGiConfig.deployOSGiConfigFile(
+				osgiConfigFileName = "com.liferay.scim.rest.internal.configuration.ScimClientOAuth2ApplicationConfiguration.config",
+				osgiConfigs = "oAuth2ApplicationName=\"Test Application Name\",companyId=L\"${companyId}\",matcherField=\"email\"");
+
+			OSGiConfig.waitForOSGiConfig();
+
+			WaitForConsoleTextPresent(value1 = "New access token for SCIM OAuth 2 application Test Application Name generated");
+
+			OAuth2.openOAuth2Admin();
+
+			LexiconEntry.gotoEntryMenuItem(
+				menuItem = "Edit",
+				rowEntry = "Test Application Name");
+
+			AssertClick(
+				key_navItem = "Authorizations",
+				locator1 = "NavBar#NAV_ITEM_LINK",
+				value1 = "Authorizations");
+
+			AssertTextEquals(
+				key_columnName = "lfr-expiration",
+				key_tableEntry = "",
+				locator1 = "LexiconTable#TABLE_ENTRY_INFO",
+				value1 = "Within 12 Months");
+		}
+
+		task ("When: Modify the accessTokenExpirationDate to a past date to simulate access token is invalid") {
+			var mysqlStatement = "SELECT accessTokenContent FROM OAuth2Authorization WHERE companyId = ${companyId};";
+
+			var sqlResults = SQL.executeMySQLStatement(mysqlStatement = ${mysqlStatement});
+
+			var accessToken = StringUtil.regexReplaceAll(${sqlResults}, "[\n]", "");
+
+			var accessToken = StringUtil.replace(${accessToken}, "accessTokenContent", "");
+
+			var curl = '''
+				${portalURL}/o/scim/v1.0/v2/Users -H 'Authorization:Bearer ${accessToken}' -i
+			''';
+
+			var response = JSONCurlUtil.get(${curl});
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "HTTP/1.1 200");
+
+			var mysqlStatement = "UPDATE OAuth2Authorization SET accessTokenExpirationDate = '2023-11-06 02:50:30.000000' WHERE companyId = ${companyId};";
+
+			var sqlResults = SQL.executeMySQLStatement(mysqlStatement = ${mysqlStatement});
+
+			var queryResult = StringUtil.regexReplaceAll(${sqlResults}, "[\r\n]", "");
+
+			if (${queryResult} != "") {
+				fail("The accessTokenExpirationDate failed to modify.");
+			}
+
+			ApplicationsMenu.gotoPortlet(
+				category = "System",
+				panel = "Control Panel",
+				portlet = "Server Administration");
+
+			ServerAdministration.executeServerResourcesActions(actionsDescription = "Clear the database cache.");
+		}
+
+		task ("Then: Assert the access token can not have access for the SCIM client") {
+			OAuth2.openOAuth2Admin();
+
+			LexiconEntry.gotoEntryMenuItem(
+				menuItem = "Edit",
+				rowEntry = "Test Application Name");
+
+			AssertClick(
+				key_navItem = "Authorizations",
+				locator1 = "NavBar#NAV_ITEM_LINK",
+				value1 = "Authorizations");
+
+			AssertTextEquals.assertPartialText(
+				key_columnName = "lfr-expiration",
+				key_tableEntry = "",
+				locator1 = "LexiconTable#TABLE_ENTRY_INFO",
+				value1 = "Ago");
+
+			var response = JSONCurlUtil.get(${curl});
+
+			TestUtils.assertPartialEquals(
+				actual = ${response},
+				expected = "HTTP/1.1 401");
 		}
 	}
 
