@@ -203,7 +203,7 @@ definition {
 			publishTemplateName = "My Template Title",
 			scheduleProcess = "true");
 
-		// Pausing 300 seconds due to LRQA-83187
+		// Pausing 300 seconds due to LRQA-83161, waiting for the scheduled Publication to be published.
 
 		Pause(value1 = 300000);
 
